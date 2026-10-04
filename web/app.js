@@ -2587,7 +2587,8 @@ async function loadAdminHealth() {
   const [healthRes,paymentRes]=await Promise.all([
     supabase.rpc("admin_system_health_v2"),
     supabase.from("license_payment_submissions")
-      .select("id,shop_id,order_request_id,amount_php,payment_method,reference_number,status,notes,admin_notes,created_at,shop:shops(name),order:license_order_requests(requested_plan,billing_cycle)")
+      .select("id,shop_id,order_request_id,amount_php,payment_method,reference_number,status,notes,admin_notes,created_at,shop:shops!inner(name,app_code),order:license_order_requests(requested_plan,billing_cycle)")
+      .eq("shop.app_code","storepos")
       .order("created_at",{ascending:false}).limit(150)
   ]);
   if(healthRes.error){root.innerHTML=`<div class="empty"><strong>System Health unavailable</strong>${esc(friendlyError(healthRes.error))}</div>`;return;}
@@ -2667,9 +2668,10 @@ async function loadAdminClients() {
   if (!root) return;
 
   const [clientRes,orderRes]=await Promise.all([
-    supabase.rpc("admin_client_overview_v2"),
+    supabase.rpc("admin_client_overview_v3",{p_app_code:"storepos"}),
     supabase.from("license_order_requests")
-      .select("id,shop_id,status,requested_plan,billing_cycle,desired_devices,desired_staff,desired_features,budget_php,notes,quoted_price_php,sunmi_v2_quantity,hardware_quote_php,admin_notes,created_at,shop:shops(name)")
+      .select("id,shop_id,status,requested_plan,billing_cycle,desired_devices,desired_staff,desired_features,budget_php,notes,quoted_price_php,sunmi_v2_quantity,hardware_quote_php,admin_notes,created_at,shop:shops!inner(name,app_code)")
+      .eq("shop.app_code","storepos")
       .order("created_at",{ascending:false})
       .limit(100)
   ]);
@@ -2887,7 +2889,8 @@ async function loadAdminSupport() {
   const root=document.querySelector("#admin-content");
   if(!root) return;
   const {data,error}=await supabase.from("support_threads")
-    .select("id,shop_id,subject,status,priority,last_message_at,created_at,ai_enabled,ai_handoff,shop:shops(name)")
+    .select("id,shop_id,subject,status,priority,last_message_at,created_at,ai_enabled,ai_handoff,shop:shops!inner(name,app_code)")
+    .eq("shop.app_code","storepos")
     .order("last_message_at",{ascending:false})
     .limit(200);
   if(error){

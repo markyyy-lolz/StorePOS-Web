@@ -1,39 +1,31 @@
 <!doctype html>
 <html>
-  <body style="margin:0;padding:0;background:#0b1220;font-family:Arial,Helvetica,sans-serif;color:#eaf1fb;">
-    <table role="presentation" width="100%" cellspacing="0" cellpadding="0" style="background:#0b1220;padding:32px 16px;">
+  <body style="margin:0;background:#f5f7fb;font-family:Arial,sans-serif;color:#111827">
+    <table role="presentation" width="100%" cellspacing="0" cellpadding="0" style="padding:32px 16px">
       <tr>
         <td align="center">
-          <table role="presentation" width="100%" cellspacing="0" cellpadding="0" style="max-width:560px;background:#111c2e;border:1px solid #24344d;border-radius:20px;overflow:hidden;">
+          <table role="presentation" width="100%" cellspacing="0" cellpadding="0" style="max-width:560px;background:#ffffff;border:1px solid #e5e7eb;border-radius:18px;padding:32px">
             <tr>
-              <td style="padding:28px 28px 10px;">
-                <div style="font-size:13px;font-weight:800;letter-spacing:.08em;text-transform:uppercase;color:#7db3ff;">StorePOS Cloud</div>
-                <h1 style="margin:12px 0 8px;font-size:28px;line-height:1.2;color:#ffffff;">Confirm your email address</h1>
-                <p style="margin:0;color:#aebbd0;font-size:14px;line-height:1.65;">
-                  Thanks for signing up for StorePOS. Confirm this email address to activate your account.
+              <td>
+                <div style="font-size:12px;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:#64748b">Account verification</div>
+                <h1 style="margin:10px 0 12px;font-size:26px;line-height:1.2">Confirm your email address</h1>
+                <p style="margin:0 0 22px;color:#475569;line-height:1.65">
+                  Confirm this email address to finish setting up the POS product you signed up for.
                 </p>
-              </td>
-            </tr>
-            <tr>
-              <td style="padding:18px 28px;">
-                <a href="https://markyyy-lolz.github.io/StorePOS-Web/#/confirm-email?token={{ .TokenHash }}"
-                   style="display:inline-block;background:#3b82f6;color:#ffffff;text-decoration:none;font-weight:800;font-size:14px;padding:13px 18px;border-radius:12px;">
-                  Confirm email address
-                </a>
-              </td>
-            </tr>
-            <tr>
-              <td style="padding:2px 28px 26px;">
-                <p style="margin:0 0 10px;color:#aebbd0;font-size:12px;line-height:1.6;">
-                  For security, this button opens StorePOS first. Your account is verified only after you manually press the confirmation button on the StorePOS page.
+                <p style="margin:0 0 24px">
+                  <a href="{{ .RedirectTo }}?token={{ .TokenHash }}" style="display:inline-block;background:#111827;color:#ffffff;text-decoration:none;font-weight:700;padding:13px 18px;border-radius:12px">
+                    Confirm email address
+                  </a>
                 </p>
-                <p style="margin:0;color:#718096;font-size:11px;line-height:1.55;">
-                  If you did not create a StorePOS account, you can ignore this email.
+                <div style="padding:14px 16px;border-radius:12px;background:#f8fafc;color:#64748b;font-size:13px;line-height:1.55">
+                  For extra protection against email security scanners, this link opens a confirmation page first. Your one-time Supabase token is only consumed after you press the confirmation button there.
+                </div>
+                <p style="margin:22px 0 0;color:#94a3b8;font-size:12px;line-height:1.5">
+                  If you did not create this account, you can ignore this email.
                 </p>
               </td>
             </tr>
           </table>
-          <p style="margin:14px 0 0;color:#64748b;font-size:10px;">© 2026 StorePOS</p>
         </td>
       </tr>
     </table>

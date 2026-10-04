@@ -395,313 +395,76 @@ function renderEmailVerified() {
 
 function renderManual() {
   const sections = [
-    {
-      id: "getting-started",
-      title: "Getting Started",
-      eyebrow: "01",
-      summary: "Create your account, verify your email, create a shop, and start the 7-day Pro Trial.",
-      body: `
-        <h3>1. Create an owner account</h3>
-        <p>Open StorePOS and choose <strong>Create Account</strong>. Enter the owner's name, email, and password.</p>
-        <h3>2. Verify the email</h3>
-        <p>Open the StorePOS verification email and press <strong>Confirm email address</strong>. StorePOS first opens a safe confirmation page; press <strong>Confirm email address</strong> there once more to complete Supabase verification. This prevents automated email-security scanners from consuming the one-time verification link before you do.</p>
-        <h3>3. Create the shop workspace</h3>
-        <p>Enter the shop name, phone number, and address. The first account becomes the shop owner.</p>
-        <h3>4. Automatic trial</h3>
-        <p>If the shop has no paid license, StorePOS automatically starts a <strong>7-day Pro Trial</strong>. No license key is required during the trial.</p>
-      `
-    },
-    {
-      id: "roles",
-      title: "Accounts & Roles",
-      eyebrow: "02",
-      summary: "Understand what Owner, Admin, Manager, Cashier, Inventory, and Mechanic accounts can access.",
-      body: `
-        <div class="manual-table">
-          <div><strong>Owner</strong><span>Full shop control, staff, settings, reports, license and devices.</span></div>
-          <div><strong>Admin</strong><span>Most owner-level shop controls except protected system-level functions.</span></div>
-          <div><strong>Manager</strong><span>Operations, inventory, reports, service and day-to-day supervision.</span></div>
-          <div><strong>Cashier</strong><span>POS, customers, service lookup and permitted transaction tasks.</span></div>
-          <div><strong>Inventory</strong><span>Products, stock, suppliers and inventory adjustments.</span></div>
-          <div><strong>Mechanic</strong><span>Customers, retails and service/job-order workflows.</span></div>
-        </div>
-        <p>Each employee should use a separate StorePOS account. Do not share the owner login.</p>
-      `
-    },
-    {
-      id: "pos",
-      title: "POS & Checkout",
-      eyebrow: "03",
-      summary: "Add products to the cart, choose a customer, complete payment, and confirm the sale.",
-      body: `
-        <h3>Starting a sale</h3>
-        <p>Open <strong>POS</strong>, search by product name, SKU or barcode, then add items to the cart. Adjust quantities before checkout.</p>
-        <h3>Checkout</h3>
-        <p>Press Checkout, choose the payment method, review totals, discounts and customer information, then complete the transaction.</p>
-        <h3>Transaction Complete</h3>
-        <p>After the database confirms the sale, StorePOS shows a centered <strong>Transaction Complete</strong> dialog with the sale number and final total. Press <strong>Done</strong> to begin the next sale.</p>
-        <div class="manual-note"><strong>Important:</strong> Stock is deducted only after the sale is successfully completed. If checkout fails, the transaction should not be treated as completed.</div>
-      `
-    },
-    {
-      id: "inventory",
-      title: "Inventory Management",
-      eyebrow: "04",
-      summary: "Add products, edit prices, adjust stock, monitor low stock and archive old items.",
-      body: `
-        <h3>Add a product</h3>
-        <p>Go to <strong>Inventory → Add Product</strong>. Enter the product name, SKU, barcode, brand, type, cost, selling price, reorder level, unit and optional opening stock.</p>
-        <h3>Edit product details</h3>
-        <p>Use <strong>Edit</strong> to update product information, pricing, barcode, brand, part number, shelf location and active status.</p>
-        <h3>Adjust stock</h3>
-        <p>Use <strong>Stock</strong> / <strong>Adjust Stock</strong>. Positive values add stock; negative values deduct stock. Select a reason such as Adjustment, Return, Damage, Theft or Opening Stock and add notes when useful.</p>
-        <h3>Archive instead of deleting</h3>
-        <p>Archive old products when you want to hide them from normal selling while keeping transaction history intact.</p>
-        <div class="manual-note"><strong>Inventory history:</strong> Manual stock adjustments are recorded as inventory movements for accountability.</div>
-      `
-    },
-    {
-      id: "customers",
-      title: "Customers & Retails",
-      eyebrow: "05",
-      summary: "Maintain customer contact information and connect retails to service history.",
-      body: `
-        <p>Use the <strong>Customers</strong> section to store customer name, phone, email and address. Customer records can be connected to retails and service jobs.</p>
-        <p>For service-oriented shops, keep retail details consistent so previous repairs and parts usage are easier to review.</p>
-      `
-    },
-    {
-      id: "service",
-      title: "Service & Job Orders",
-      eyebrow: "06",
-      summary: "Track workshop jobs from complaint and diagnosis through repair and release.",
-      body: `
-        <p>Open <strong>Service</strong> to review job numbers, complaint, priority, odometer and status.</p>
-        <p>Use consistent statuses such as <strong>Waiting → Inspection → Repairing → Testing → Ready → Released</strong> so the whole team knows the retail's current stage.</p>
-        <p>Parts and labor associated with a service job should be attached to the same job order whenever available.</p>
-      `
-    },
-    {
-      id: "staff",
-      title: "Staff Management",
-      eyebrow: "07",
-      summary: "Create separate staff accounts and assign the correct role.",
-      body: `
-        <p>Owners and Shop Admins can open <strong>Staff → Add Staff Account</strong>. Enter the employee's full name, email, temporary password and role.</p>
-        <p>The shop's license controls the maximum number of active staff accounts. Staff should change and protect their login credentials after receiving them.</p>
-      `
-    },
-    {
-      id: "support",
-      title: "Support Chat",
-      eyebrow: "08",
-      summary: "Contact StorePOS Support directly from the app or web dashboard.",
-      body: `
-        <p>Open <strong>Support</strong> or <strong>Support Chat</strong>, create a new conversation, choose the priority and describe the issue.</p>
-        <p>Replies from the StorePOS team appear in the same conversation. Conversations may be marked Open, Pending or Closed.</p>
-        <p>For faster troubleshooting, include the device model, app version, affected screen and the exact error message.</p>
-      `
-    },
-    {
-      id: "license",
-      title: "Trial, License & Devices",
-      eyebrow: "09",
-      summary: "Understand the 7-day trial, paid activation, device limits and suspended/expired access.",
-      body: `
-        <h3>7-day Pro Trial</h3>
-        <p>A new shop without a paid license receives the Pro Trial automatically. The app displays the remaining trial days.</p>
-        <h3>Paid activation</h3>
-        <p>When a paid license is issued, a new unregistered Android device may ask for the StorePOS license key. Enter the key provided by the StorePOS administrator.</p>
-        <h3>Expired or suspended license</h3>
-        <p>The app blocks licensed operations when the license is expired or suspended. After the administrator renews/reactivates it, press <strong>Check License Again</strong>.</p>
-        <h3>Device limits</h3>
-        <p>Each plan has a maximum number of active devices. Old devices can be reset from the Developer Control Center when necessary.</p>
-      `
-    },
-    {
-      id: "reports",
-      title: "Dashboard & Reports",
-      eyebrow: "10",
-      summary: "Use sales, stock, expenses and service data to monitor shop operations.",
-      body: `
-        <p>The dashboard summarizes sales, active jobs, low-stock products and other role-appropriate information.</p>
-        <p>Reports use cloud data from completed sales and recorded expenses. Owners, admins and managers have broader financial visibility than lower staff roles.</p>
-      `
-    },
-    {
-      id: "web",
-      title: "StorePOS Cloud Website",
-      eyebrow: "11",
-      summary: "Use the web dashboard for management, inventory, support and shop administration.",
-      body: `
-        <p>The Android app is designed for counter and workshop operations. <strong>StorePOS Cloud</strong> is the management layer for owners and managers.</p>
-        <p>From the website you can review sales, manage inventory, staff, service jobs, suppliers, reports, support, license status and devices based on your role.</p>
-      `
-    },
-    {
-      id: "admin",
-      title: "System Admin Guide",
-      eyebrow: "12",
-      summary: "Manage client shops, licenses, user accounts and the StorePOS Support Inbox.",
-      body: `
-        <p>The <strong>Developer Control Center</strong> is only for approved StorePOS System Admin accounts.</p>
-        <h3>Clients & Licenses</h3>
-        <p>Issue Basic, Pro or Business licenses, set expiration dates, device/staff limits, suspend/reactivate licenses and reset registered devices.</p>
-        <h3>Users & Emails</h3>
-        <p>Disable accounts, remove/anonymize email addresses, or permanently delete accounts when it is safe. Accounts with protected business history should normally be disabled/anonymized rather than force-deleted.</p>
-        <h3>Support Inbox</h3>
-        <p>Review customer conversations, reply as StorePOS Support and change the request status.</p>
-        <div class="manual-note"><strong>Safety:</strong> Never expose the Supabase service-role key, master credentials or private administrator secrets in the public website or Android APK.</div>
-      `
-    },
-    {
-      id: "v2-operations",
-      title: "StorePOS 2.1 Production POS",
-      eyebrow: "V2",
-      summary: "Production register control, split payments, Z-reports, partial returns, stocktake, receivables, workshop and multi-branch operations.",
-      body: `
-        <h3>Cashier shifts & daily control</h3>
-        <p>Use <strong>Operations</strong> to start a cashier shift with opening cash and close it using the actual drawer amount. StorePOS calculates expected cash and variance from recorded cash sales and cash refunds.</p>
-        <h3>Cash drawer & Z-report</h3>
-        <p>During an open shift, authorized staff can record Cash In and Cash Out with a reason. Closing the shift compares the physical drawer with expected cash and stores a Z-report containing cash/non-cash sales, refunds, drawer movements, discounts, tax, transactions and variance.</p>
-        <h3>Split payments & customer credit</h3>
-        <p>A checkout can combine Cash, GCash, Maya, Card, Bank, Store Credit, Customer Credit and Other payment rows. Digital methods require a reference. Customer Credit creates a receivable that can be collected later without changing the original sale.</p>
-        <h3>Hold / Park Sale</h3>
-        <p>Park an unfinished cart and recall it later. Holding a cart does not reduce inventory; stock changes only when checkout is committed.</p>
-        <h3>Manager PIN approvals</h3>
-        <p>Owners, admins and managers can set a 4–8 digit Manager Approval PIN. Protected actions such as voids and refunds require a valid manager PIN.</p>
-        <h3>Partial returns, refunds and voids</h3>
-        <p>Completed sales support item-by-item and quantity-based returns with optional restocking. Full voids and refunds reverse the appropriate inventory/account effects and are protected by manager approval and audit logs.</p>
-        <h3>Price override & cashier discount limit</h3>
-        <p>Authorized users can override an item price for a transaction. Cashiers are required to enter a Manager PIN when a price override or discount exceeds the shop's configured limit.</p>
-        <h3>Camera barcode scanner</h3>
-        <p>In Android POS, press the scanner icon in the product search field. Matching barcode/SKU products are added directly to the cart.</p>
-        <h3>Offline POS & sync queue</h3>
-        <p>The Android POS caches products, customers and retail records locally. If the cloud becomes unavailable during checkout, the sale is stored on the device with a unique transaction key and synchronized when connectivity returns. Offline transactions remain provisional until cloud sync succeeds.</p>
-        <h3>Physical stocktake</h3>
-        <p>Inventory staff can start a stocktake, enter physical counts and submit variances. Owners/admins/managers approve the count before StorePOS posts stock adjustments and inventory movement history.</p>
-        <h3>Purchase orders & receiving</h3>
-        <p>Use Suppliers & Purchasing to build purchase orders with multiple products. Receiving updates product stock, cost and inventory movement history.</p>
-        <h3>Quotations & estimates</h3>
-        <p>Create estimates for parts, services and labor. Quotes linked to a customer and retail can be converted directly into Job Orders.</p>
-        <h3>Technician timer</h3>
-        <p>Mechanics can start and stop timers on active service jobs to record actual work duration.</p>
-        <h3>Maintenance reminders</h3>
-        <p>Create a reminder for a customer retail using a due date, due odometer, or both, then mark it completed after the maintenance visit.</p>
-        <h3>Warranty & claims</h3>
-        <p>Products with warranty days automatically generate warranty coverage when sold. Warranty claims are managed in Operations.</p>
-        <h3>Loyalty & store credit</h3>
-        <p>Customers earn loyalty points automatically on completed sales and balances can also be adjusted by authorized staff. Store-credit refunds are supported and customer balances are visible in the portal.</p>
-        <h3>Customer Portal & booking</h3>
-        <p>Generate a private, expiring portal link for a customer. They can view retails, job history, warranties, loyalty/store credit and request service appointments.</p>
-        <h3>Multi-branch & stock transfers</h3>
-        <p>Owners/managers with access to multiple shops can organize branch groups and transfer inventory between branches. Stock is deducted when shipped and added only when the destination receives the transfer.</p>
-        <h3>Advanced analytics</h3>
-        <p>Reports now include 30-day revenue, gross profit, operating net, average ticket and top-selling products.</p>
-      `
-    },
-    {
-      id: "troubleshooting",
-      title: "Troubleshooting",
-      eyebrow: "13",
-      summary: "Quick fixes for the most common account, license, connection and transaction issues.",
-      body: `
-        <div class="manual-faq">
-          <details open><summary>Email verification opens localhost</summary><p>Use a newly generated verification email after the StorePOS redirect URL is configured. Old links may still contain the previous redirect.</p></details>
-          <details><summary>Unexpected status code returned from hook: 405</summary><p>The Supabase Send Email Auth Hook is pointing to a normal website page instead of an email-hook endpoint. Disable that custom hook or configure a valid Send Email Edge Function, then try creating the account again.</p></details>
-          <details><summary>Incorrect email or password</summary><p>Confirm the email is verified, then check the exact email/password used for the account.</p></details>
-          <details><summary>Trial expired</summary><p>Ask the StorePOS administrator to issue or renew a license, then press Check License Again.</p></details>
-          <details><summary>Device limit reached</summary><p>Deactivate/reset an old device or upgrade the plan's device limit.</p></details>
-          <details><summary>Product cannot go below zero</summary><p>The shop has negative stock disabled. Correct the physical count or receive/add stock before completing the deduction.</p></details>
-          <details><summary>Transaction did not complete</summary><p>Do not assume the sale was recorded unless StorePOS displays Transaction Complete. Check the Sales list before retrying to avoid duplicate charging.</p></details>
-          <details><summary>Need more help</summary><p>Open Support Chat and send the exact issue, screenshot/error text, device model and app version.</p></details>
-        </div>
-      `
-    }
+    ["01","Getting Started","Create your StorePOS account, verify your email, create a retail workspace, and begin the 7-day StorePOS Pro Trial."],
+    ["02","Point of Sale","Scan a barcode or search products, adjust quantity, select an optional customer, apply allowed discounts, and complete payment."],
+    ["03","Products & Inventory","Create SKUs/barcodes, categories, prices, units, reorder levels and stock adjustments. Inventory movements preserve an audit trail."],
+    ["04","Customers & Loyalty","Maintain customer contact details, loyalty points and store-credit balances without motorcycle or workshop records."],
+    ["05","Suppliers & Purchasing","Maintain supplier records and use purchasing/receiving workflows to replenish retail inventory."],
+    ["06","Cashier Operations","Use cashier shifts, cash movements, returns, refunds and manager approval controls for daily store operations."],
+    ["07","Reports","Review revenue, gross profit, transaction count, average ticket, expenses and top-selling products according to plan access."],
+    ["08","Branches","Business plans can organize multiple retail branches and move stock between StorePOS locations."],
+    ["09","Receipt Printing","StorePOS supports Bluetooth and USB/USB-OTG ESC/POS receipt printers. Test the printer in Settings before live selling."],
+    ["10","Barcode Scanner","Use the Android camera scanner in POS and Inventory. A matched barcode selects the product immediately."],
+    ["11","Offline Selling","When supported by the workflow, sales can be queued locally and synchronized after connectivity returns. Always verify pending sync before closing the day."],
+    ["12","Licensing & Devices","Each StorePOS shop has its own StorePOS plan, device limit, staff limit and feature entitlements. MotoPOS licenses cannot be used on StorePOS shops."],
+    ["13","Support","StorePOS Auto Support handles common guided troubleshooting first and can hand unresolved or sensitive requests to human support."],
+    ["14","SUNMI V2","SUNMI V2 hardware is optional. Custom StorePOS software pricing and hardware quotations are kept separate, then combined in the suggested payment total when both are quoted."]
   ];
 
   app.innerHTML = `
-    <div class="public-shell manual-page">
+    <div class="public-shell">
       <nav class="public-nav">
-        <a href="#/" class="brand"><span class="brand-logo">M</span><span>StorePOS</span></a>
+        <a href="#/" class="brand"><span class="brand-logo">S</span><span>StorePOS</span></a>
         <div class="nav-actions">
-          <a class="btn btn-secondary" href="https://github.com/markyyy-lolz/StorePOS-Web" target="_blank" rel="noopener noreferrer">Resources</a>
           <a class="btn btn-secondary" href="#/">Website</a>
           ${state.session && state.shop ? '<a class="btn btn-primary" href="#/dashboard/overview">Dashboard</a>' : '<a class="btn btn-primary" href="#/login">Sign in</a>'}
         </div>
       </nav>
 
-      <section class="manual-hero">
-        <span class="eyebrow">StorePOS Help Center</span>
-        <h1>App Manual & User Guide</h1>
-        <p>Step-by-step instructions for owners, cashiers, inventory staff, mechanics, managers and StorePOS administrators.</p>
-        <div class="hero-actions" style="margin-top:14px">
-          <a class="btn btn-secondary" href="https://github.com/markyyy-lolz/StorePOS-Web" target="_blank" rel="noopener noreferrer">Open StorePOS Resources</a>
-        </div>
-        <div class="manual-search-wrap">
-          <input id="manual-search" class="input manual-search" type="search" placeholder="Search manual — e.g. checkout, inventory, trial, staff…" autocomplete="off">
-        </div>
-      </section>
-
-      <div class="manual-layout">
-        <aside class="manual-toc">
-          <strong>Contents</strong>
-          ${sections.map(s=>`<a href="#manual-${s.id}" data-manual-link="${s.id}"><span>${s.eyebrow}</span>${esc(s.title)}</a>`).join("")}
-        </aside>
-
-        <main class="manual-content" id="manual-content">
-          <div class="manual-intro-card">
-            <div>
-              <span class="kicker">Current guide</span>
-              <h2>StorePOS Android + StorePOS Cloud</h2>
-              <p>This manual covers the current core workflows. Features may expand as new StorePOS versions are released.</p>
-            </div>
-            <div class="manual-version">v2.1.0</div>
+      <main>
+        <section class="hero compact-hero">
+          <div class="hero-copy">
+            <span class="kicker">StorePOS Help Center</span>
+            <h1>Retail operations manual.</h1>
+            <p>Practical guidance for owners, managers, cashiers and inventory staff using StorePOS Android and StorePOS Cloud.</p>
           </div>
+        </section>
 
-          ${sections.map(s=>`
-            <article class="manual-section" id="manual-${s.id}" data-manual-section data-search="${esc((s.title+" "+s.summary).toLowerCase())}">
-              <div class="manual-section-head">
-                <span>${s.eyebrow}</span>
-                <div><h2>${esc(s.title)}</h2><p>${esc(s.summary)}</p></div>
-              </div>
-              <div class="manual-body">${s.body}</div>
-            </article>
-          `).join("")}
+        <section class="section">
+          <div class="section-head">
+            <div><span class="kicker">Core workflow</span><h2>From setup to daily closing.</h2></div>
+            <p>StorePOS is isolated from MotoPOS by <strong>app_code = storepos</strong> while sharing the same secure Supabase foundation.</p>
+          </div>
+          <div class="feature-grid">
+            ${sections.map(([n,title,body])=>`
+              <article class="feature-card">
+                <span class="kicker">${n}</span>
+                <h3>${esc(title)}</h3>
+                <p>${esc(body)}</p>
+              </article>
+            `).join("")}
+          </div>
+        </section>
 
-          <div id="manual-empty" class="empty" style="display:none"><strong>No matching guide found</strong>Try another keyword such as POS, inventory, license, staff or support.</div>
-        </main>
-      </div>
+        <section class="section">
+          <div class="card">
+            <div class="card-title"><h3>Daily retail checklist</h3><span>Recommended</span></div>
+            <div class="manual-table">
+              <div><strong>Before opening</strong><span>Confirm internet, printer, scanner, active shift and low-stock alerts.</span></div>
+              <div><strong>During sales</strong><span>Use individual staff accounts and verify discounts, payment method and change before confirming.</span></div>
+              <div><strong>Receiving</strong><span>Record incoming stock through purchasing/stock adjustment so quantities stay auditable.</span></div>
+              <div><strong>Returns</strong><span>Use StorePOS return/refund controls instead of manually changing completed sales.</span></div>
+              <div><strong>Closing</strong><span>Review shift totals, sync status, cash movements, returns and reports before ending the business day.</span></div>
+            </div>
+          </div>
+        </section>
+      </main>
 
       <footer class="footer">
-        <span>© 2026 StorePOS Cloud · App Manual</span>
-        <span><a href="#/manual">Help Center</a> · <a href="https://github.com/markyyy-lolz/StorePOS-Web" target="_blank" rel="noopener noreferrer">Resources</a> · <a href="#/">StorePOS Website</a></span>
+        <span>© 2026 StorePOS · Built by Mark Reymuel Pascual</span>
+        <span><a href="#/">StorePOS Website</a> · Retail POS • Inventory • Reports • Licensing</span>
       </footer>
     </div>`;
-
-  const search = document.querySelector("#manual-search");
-  const cards = [...document.querySelectorAll("[data-manual-section]")];
-  const empty = document.querySelector("#manual-empty");
-
-  search?.addEventListener("input", () => {
-    const term = search.value.trim().toLowerCase();
-    let visible = 0;
-    cards.forEach(card => {
-      const haystack = (card.textContent || "").toLowerCase();
-      const show = !term || haystack.includes(term);
-      card.style.display = show ? "" : "none";
-      if (show) visible++;
-    });
-    if (empty) empty.style.display = visible ? "none" : "";
-  });
-
-  document.querySelectorAll("[data-manual-link]").forEach(link => {
-    link.addEventListener("click", event => {
-      event.preventDefault();
-      const id = link.dataset.manualLink;
-      document.querySelector("#manual-" + id)?.scrollIntoView({behavior:"smooth",block:"start"});
-    });
-  });
 }
 
 function renderLanding() {

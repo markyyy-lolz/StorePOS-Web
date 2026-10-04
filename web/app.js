@@ -2,7 +2,8 @@ import { createClient } from "https://cdn.jsdelivr.net/npm/@supabase/supabase-js
 
 const SUPABASE_URL = "https://qgyzdoltjlryjthxxscw.supabase.co";
 const SUPABASE_KEY = "sb_publishable_mCjtfE-W75s1yyUdw2NY2g_z6ic5DIc";
-const EMAIL_CONFIRM_REDIRECT = "https://markyyy-lolz.github.io/StorePOS-Web/?email-confirmed=1";
+const EMAIL_CONFIRM_GATE = "https://markyyy-lolz.github.io/StorePOS-Web/#/confirm-email";
+const EMAIL_CONFIRM_SUCCESS = "https://markyyy-lolz.github.io/StorePOS-Web/?email-confirmed=1";
 
 const supabase = createClient(SUPABASE_URL, SUPABASE_KEY, {
   auth: {
@@ -323,7 +324,7 @@ function renderEmailConfirmationGate() {
   app.innerHTML = `
     <div class="setup">
       <div class="setup-card email-confirm-card">
-        <div class="brand"><span class="brand-logo">M</span><span>StorePOS</span></div>
+        <div class="brand"><span class="brand-logo">S</span><span>StorePOS</span></div>
         <div class="verify-shield">✓</div>
         <span class="eyebrow">Email verification</span>
         <h1>${validToken ? "Confirm your email address" : "Verification link unavailable"}</h1>
@@ -361,7 +362,7 @@ function renderEmailConfirmationGate() {
     const verifyUrl = new URL(SUPABASE_URL + "/auth/v1/verify");
     verifyUrl.searchParams.set("token", token);
     verifyUrl.searchParams.set("type", "email");
-    verifyUrl.searchParams.set("redirect_to", EMAIL_CONFIRM_REDIRECT);
+    verifyUrl.searchParams.set("redirect_to", EMAIL_CONFIRM_SUCCESS);
     window.location.assign(verifyUrl.toString());
   });
 }
@@ -374,7 +375,7 @@ function renderEmailVerified() {
   app.innerHTML = `
     <div class="setup">
       <div class="setup-card">
-        <div class="brand"><span class="brand-logo">M</span><span>StorePOS</span></div>
+        <div class="brand"><span class="brand-logo">S</span><span>StorePOS</span></div>
         <div style="height:14px"></div>
         <span class="eyebrow">${failed ? "Verification problem" : "Email verified"}</span>
         <h1>${failed ? "We couldn't verify that link" : "Email confirmed successfully"}</h1>
@@ -471,7 +472,7 @@ function renderLanding() {
   app.innerHTML = `
     <div class="public-shell">
       <nav class="public-nav">
-        <a href="#/" class="brand"><span class="brand-logo">M</span><span>StorePOS</span></a>
+        <a href="#/" class="brand"><span class="brand-logo">S</span><span>StorePOS</span></a>
         <div class="nav-actions">
           <a class="btn btn-secondary" href="https://github.com/markyyy-lolz/StorePOS-Web" target="_blank" rel="noopener noreferrer">Resources</a>
           <a class="btn btn-secondary" href="#/manual">App Manual</a>
@@ -726,7 +727,7 @@ async function resendConfirmation() {
     const { error } = await supabase.auth.resend({
       type: "signup",
       email,
-      options: { emailRedirectTo: EMAIL_CONFIRM_REDIRECT }
+      options: { emailRedirectTo: EMAIL_CONFIRM_GATE }
     });
     if (error) throw error;
     toast("Verification email requested. Check Inbox and Spam/Junk.", "success");
@@ -760,7 +761,7 @@ async function handleAuth(event) {
         password,
         options: {
           data: { display_name: displayName },
-          emailRedirectTo: EMAIL_CONFIRM_REDIRECT
+          emailRedirectTo: EMAIL_CONFIRM_GATE
         }
       });
       if (error) throw error;
@@ -798,7 +799,7 @@ function renderSetup() {
   app.innerHTML = `
     <div class="setup">
       <div class="setup-card">
-        <div class="brand"><span class="brand-logo">M</span><span>StorePOS</span></div>
+        <div class="brand"><span class="brand-logo">S</span><span>StorePOS</span></div>
         <h1>Finish your shop setup</h1>
         <p>Your owner account is authenticated. Create the first workspace that will belong to this account.</p>
         <div class="account-box"><strong>Signed-in owner</strong><span>${esc(state.user?.email || "Authenticated account")}</span></div>
@@ -859,7 +860,7 @@ function renderShell(page) {
   app.innerHTML = `
     <div class="app-shell">
       <aside class="sidebar">
-        <div class="brand"><span class="brand-logo">M</span><span>StorePOS</span></div>
+        <div class="brand"><span class="brand-logo">S</span><span>StorePOS</span></div>
         <div class="shop-chip"><strong>${esc(state.shop?.name || "StorePOS")}</strong><span>${esc(role)} · ${esc(state.entitlements?.plan_name || state.entitlements?.status || "No plan")}</span></div>
         <nav class="nav-list">
           ${pages.map(p => `<a class="nav-item ${p === page ? "active" : ""}" href="#/dashboard/${p}"><span>${navLabel(p)}</span></a>`).join("")}
@@ -2314,7 +2315,7 @@ async function renderAdmin() {
   app.innerHTML = `
     <div class="app-shell">
       <aside class="sidebar">
-        <div class="brand"><span class="brand-logo">M</span><span>StorePOS</span></div>
+        <div class="brand"><span class="brand-logo">S</span><span>StorePOS</span></div>
         <div class="shop-chip"><strong>Developer Control</strong><span>System administrator</span></div>
         <nav class="nav-list">
           <a class="nav-item ${section==="clients"?"active":""}" href="#/admin"><span>Clients & Licenses</span><span class="nav-badge">ADMIN</span></a>

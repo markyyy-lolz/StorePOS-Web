@@ -1,7 +1,7 @@
 {
-  "version": "1.0.0",
+  "version": "1.1.0",
   "app_code": "storepos",
   "product": "StorePOS Cloud",
-  "released_at": "2026-10-04",
-  "summary": "Initial retail release using the shared StorePOS/MotoPOS Supabase backend."
+  "released_at": "2026-10-05",
+  "summary": "Advanced Retail Suite: pack/tingi, wholesale, variants, batches, serials, promos, reservations, credit, pricing intelligence, labels and digital receipts."
 }

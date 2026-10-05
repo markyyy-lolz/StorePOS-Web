@@ -1,5 +1,6 @@
 import { createClient } from "https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.117.2/+esm";
-import { pageRetail, renderDigitalReceipt } from "./retail.js?v=20261005-v110";
+import { pageRetail, renderDigitalReceipt } from "./retail.js?v=20261005-v130";
+import { pageStoreOps } from "./ops13.js?v=20261005-v130";
 
 const SUPABASE_URL = "https://qgyzdoltjlryjthxxscw.supabase.co";
 const SUPABASE_KEY = "sb_publishable_mCjtfE-W75s1yyUdw2NY2g_z6ic5DIc";
@@ -113,17 +114,17 @@ function currentPath() {
 
 function rolePages(role) {
   const r = String(role || "").toLowerCase();
-  const full = ["overview","sales","inventory","retail","customers","staff","suppliers","operations","branches","reports","support","license","devices","settings"];
+  const full = ["overview","sales","inventory","retail","control","customers","staff","suppliers","operations","branches","reports","support","license","devices","settings"];
   if (["owner","admin","manager"].includes(r)) return full;
-  if (r === "cashier") return ["overview","sales","retail","customers","operations","support","license"];
-  if (r === "inventory") return ["overview","inventory","retail","suppliers","operations","support","license"];
-  if (r === "mechanic") return ["overview","sales","inventory","retail","customers","operations","support","license"];
+  if (r === "cashier") return ["overview","sales","retail","control","customers","operations","support","license"];
+  if (r === "inventory") return ["overview","inventory","retail","control","suppliers","operations","support","license"];
+  if (r === "mechanic") return ["overview","sales","inventory","retail","control","customers","operations","support","license"];
   return ["overview","support","license"];
 }
 
 function navLabel(page) {
   return ({
-    overview:"Overview", sales:"Sales", inventory:"Inventory", retail:"Retail Suite", customers:"Customers",
+    overview:"Overview", sales:"Sales", inventory:"Inventory", retail:"Retail Suite", control:"Retail Control", customers:"Customers",
     staff:"Staff", suppliers:"Suppliers", operations:"Operations", branches:"Branches", reports:"Reports",
     support:"Support Chat", license:"License", devices:"Devices", settings:"Settings"
   })[page] || page;
@@ -158,6 +159,7 @@ const PAGE_FEATURES = {
   sales: ["pos"],
   inventory: ["inventory"],
   retail: ["retail_suite","inventory","operations","pos"],
+  control: ["retail_suite","inventory","operations","pos"],
   customers: ["customers"],
   staff: ["staff"],
   suppliers: ["suppliers"],
@@ -911,6 +913,7 @@ async function loadDashboardPage(page) {
       case "sales": return await pageSales(root);
       case "inventory": return await pageInventory(root);
       case "retail": return await pageRetail(root, retailContext());
+      case "control": return await pageStoreOps(root, retailContext());
       case "customers": return await pageCustomers(root);
       case "staff": return await pageStaff(root);
       case "suppliers": return await pageSuppliers(root);
@@ -1011,15 +1014,40 @@ async function pageOverview(root) {
 }
 
 async function pageSales(root) {
-  const { data, error } = await supabase.from("sales")
-    .select("id,sale_number,total_amount,subtotal,discount_amount,tax_amount,status,created_at,completed_at")
-    .eq("shop_id",state.shop.id).order("created_at",{ascending:false}).limit(150);
-  if (error) throw error;
+  const [salesRes, detailsRes] = await Promise.all([
+    supabase.from("sales")
+      .select("id,sale_number,total_amount,subtotal,discount_amount,tax_amount,status,created_at,completed_at")
+      .eq("shop_id",state.shop.id).order("created_at",{ascending:false}).limit(150),
+    supabase.from("retail_sale_details")
+      .select("sale_id,receipt_token")
+      .eq("shop_id",state.shop.id).order("created_at",{ascending:false}).limit(250)
+  ]);
+  if (salesRes.error) throw salesRes.error;
+  if (detailsRes.error) throw detailsRes.error;
+  const data=salesRes.data||[];
+  const tokenBySale=new Map((detailsRes.data||[]).map(x=>[x.sale_id,x.receipt_token]));
   root.innerHTML = `
     ${head("Sales","Recent POS transactions from all allowed terminals")}
-    <div class="table-wrap"><table><thead><tr><th>Sale</th><th>Date</th><th>Status</th><th>Subtotal</th><th>Discount</th><th>Total</th></tr></thead><tbody>
-      ${(data||[]).map(s=>`<tr><td><strong>${esc(s.sale_number)}</strong></td><td>${niceDate(s.created_at,true)}</td><td>${pill(s.status)}</td><td>${money(s.subtotal)}</td><td>${money(s.discount_amount)}</td><td><strong>${money(s.total_amount)}</strong></td></tr>`).join("") || '<tr><td colspan="6">No transactions yet.</td></tr>'}
+    <div class="table-wrap"><table><thead><tr><th>Sale</th><th>Date</th><th>Status</th><th>Subtotal</th><th>Discount</th><th>Total</th><th>Receipt</th></tr></thead><tbody>
+      ${data.map(s=>`<tr><td><strong>${esc(s.sale_number)}</strong></td><td>${niceDate(s.created_at,true)}</td><td>${pill(s.status)}</td><td>${money(s.subtotal)}</td><td>${money(s.discount_amount)}</td><td><strong>${money(s.total_amount)}</strong></td><td>${tokenBySale.get(s.id)?`<button class="btn btn-secondary btn-sm sales-reprint" data-id="${s.id}">Reprint</button>`:'<span class="help">Legacy receipt</span>'}</td></tr>`).join("") || '<tr><td colspan="7">No transactions yet.</td></tr>'}
     </tbody></table></div>`;
+
+  root.querySelectorAll(".sales-reprint").forEach(btn=>btn.addEventListener("click",async()=>{
+    const sale=data.find(x=>x.id===btn.dataset.id);
+    const token=tokenBySale.get(btn.dataset.id);
+    if(!sale||!token) return;
+    const reason=window.prompt("Reason for receipt reprint:", "Customer requested another copy");
+    if(reason===null) return;
+    if(!reason.trim()) return toast("A reprint reason is required.","error");
+    const log=await supabase.rpc("storepos_v13_action",{
+      p_shop_id:state.shop.id,
+      p_action:"receipt_reprint",
+      p_data:{sale_id:sale.id,reason:reason.trim()}
+    });
+    if(log.error) return toast(friendlyError(log.error),"error");
+    window.open(location.origin+location.pathname+"#/receipt/"+encodeURIComponent(token),"_blank","noopener");
+    toast("Receipt reprint logged as copy #"+Number(log.data?.copy_no||1)+".","success");
+  }));
 }
 
 async function pageInventory(root) {

@@ -2944,7 +2944,8 @@ async function openLicenseModal(shopId, shopName, order = null) {
 
   const planMap = Object.fromEntries(plans.map(plan => [plan.code, plan]));
   const initialPlan=planMap[order?.requested_plan]?order.requested_plan:(planMap.store_pro?"store_pro":plans[0].code);
-  const allFeatures=[...new Set(plans.flatMap(p=>Array.isArray(p.features)?p.features:[]))];
+  const customOnlyFeatures=["paymongo_payments"];
+  const allFeatures=[...new Set([...plans.flatMap(p=>Array.isArray(p.features)?p.features:[]),...customOnlyFeatures])];
   const initialFeatures=new Set(order&&Array.isArray(order.desired_features)?order.desired_features:(planMap[initialPlan]?.features||[]));
   const initialCycle=order?.billing_cycle||"annual";
 

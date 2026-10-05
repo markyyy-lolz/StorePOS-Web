@@ -6,6 +6,11 @@ on:
     paths:
       - "web/**"
       - ".github/workflows/pages.yml"
+  pull_request:
+    branches: [main]
+    paths:
+      - "web/**"
+      - ".github/workflows/pages.yml"
   workflow_dispatch:
 
 permissions:
@@ -25,7 +30,9 @@ jobs:
         uses: actions/checkout@v4
 
       - name: Validate JavaScript
-        run: node --check web/app.js
+        run: |
+          node --check web/app.js
+          node --check web/retail.js
 
       - name: Configure Pages
         uses: actions/configure-pages@v5
@@ -38,6 +45,7 @@ jobs:
           path: web
 
   deploy:
+    if: github.event_name != 'pull_request'
     environment:
       name: github-pages
       url: ${{ steps.deployment.outputs.page_url }}

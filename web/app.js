@@ -4,8 +4,9 @@ import { pageStoreOps } from "./ops13.js?v=20261005-v130";
 
 const SUPABASE_URL = "https://qgyzdoltjlryjthxxscw.supabase.co";
 const SUPABASE_KEY = "sb_publishable_mCjtfE-W75s1yyUdw2NY2g_z6ic5DIc";
-const EMAIL_CONFIRM_GATE = "https://markyyy-lolz.github.io/StorePOS-Web/#/confirm-email";
-const EMAIL_CONFIRM_SUCCESS = "https://markyyy-lolz.github.io/StorePOS-Web/?email-confirmed=1";
+const EMAIL_CONFIRM_GATE = "https://storepos.2023107337.workers.dev/#/confirm-email";
+const EMAIL_CONFIRM_SUCCESS = "https://storepos.2023107337.workers.dev/?email-confirmed=1";
+const TURNSTILE_SITE_KEY = "0x4AAAAAAFORduMdXxtZDB1o";
 
 const supabase = createClient(SUPABASE_URL, SUPABASE_KEY, {
   auth: {
@@ -27,6 +28,9 @@ const state = {
   isSystemAdmin: false,
   authMode: "signin",
   busy: false,
+  turnstileToken: null,
+  turnstileWidgetId: null,
+  turnstileMountTimer: null,
   supportThreadId: null,
   supportChannel: null,
   entitlements: null
@@ -239,6 +243,7 @@ async function functionErrorDetails(error) {
 function friendlyError(error) {
   const raw = error?.message || String(error || "Something went wrong.");
   const lower = raw.toLowerCase();
+  if (lower.includes("captcha") || lower.includes("turnstile")) return "Cloudflare verification failed or expired. Complete the security check and try again.";
   if (lower.includes("invalid login credentials")) return "Incorrect email or password.";
   if (lower.includes("email not confirmed")) return "Verify your email first, then sign in.";
   if (lower.includes("over_email_send_rate_limit") || lower.includes("email rate limit exceeded")) return "Verification email limit reached. Please try again later. For production sign-ups, StorePOS needs a custom SMTP email provider.";
@@ -249,6 +254,66 @@ function friendlyError(error) {
   if (lower.includes("rate limit") || lower.includes("too many requests")) return "Email sending is temporarily rate-limited. Wait before requesting another verification email.";
   if (lower.includes("network") || lower.includes("fetch")) return "Unable to reach StorePOS Cloud. Check your internet connection.";
   return raw.split("\n")[0].slice(0, 220);
+}
+
+function clearTurnstileMountTimer() {
+  if (state.turnstileMountTimer) {
+    clearTimeout(state.turnstileMountTimer);
+    state.turnstileMountTimer = null;
+  }
+}
+
+function destroyTurnstile() {
+  clearTurnstileMountTimer();
+  state.turnstileToken = null;
+  if (state.turnstileWidgetId !== null && window.turnstile?.remove) {
+    try { window.turnstile.remove(state.turnstileWidgetId); } catch (_) {}
+  }
+  state.turnstileWidgetId = null;
+}
+
+function resetTurnstile() {
+  state.turnstileToken = null;
+  if (state.turnstileWidgetId !== null && window.turnstile?.reset) {
+    try { window.turnstile.reset(state.turnstileWidgetId); } catch (_) {}
+  }
+}
+
+function mountTurnstile(attempt = 0) {
+  const target = document.querySelector("#turnstile-widget");
+  if (!target) return;
+
+  if (window.turnstile?.render) {
+    clearTurnstileMountTimer();
+    if (state.turnstileWidgetId !== null && window.turnstile?.remove) {
+      try { window.turnstile.remove(state.turnstileWidgetId); } catch (_) {}
+    }
+    state.turnstileToken = null;
+    state.turnstileWidgetId = window.turnstile.render(target, {
+      sitekey: TURNSTILE_SITE_KEY,
+      theme: "dark",
+      action: state.authMode === "signup" ? "storepos_signup" : "storepos_signin",
+      callback: token => {
+        state.turnstileToken = token;
+      },
+      "expired-callback": () => {
+        state.turnstileToken = null;
+      },
+      "error-callback": () => {
+        state.turnstileToken = null;
+        toast("Cloudflare verification could not load. Refresh the page and try again.", "error");
+      }
+    });
+    return;
+  }
+
+  if (attempt < 50) {
+    clearTurnstileMountTimer();
+    state.turnstileMountTimer = setTimeout(() => mountTurnstile(attempt + 1), 100);
+    return;
+  }
+
+  target.innerHTML = '<div class="help turnstile-error">Cloudflare verification did not load. Refresh the page and try again.</div>';
 }
 
 function setupMotion(scope = document) {
@@ -661,6 +726,7 @@ async function loadPublicPlans() {
   setupMotion(root);
 }
 function renderAuth() {
+  destroyTurnstile();
   const signupFromUrl = location.hash.includes("mode=signup");
   if (signupFromUrl) state.authMode = "signup";
   const signup = state.authMode === "signup";
@@ -690,6 +756,10 @@ function renderAuth() {
             ${signup ? `<div class="field"><label>Display name</label><input class="input" name="display_name" autocomplete="name" required placeholder="Shop owner name"></div>` : ""}
             <div class="field"><label>Email address</label><input class="input" type="email" name="email" autocomplete="email" required placeholder="you@example.com"></div>
             <div class="field"><label>Password</label><input class="input" type="password" name="password" autocomplete="${signup ? "new-password" : "current-password"}" minlength="${signup ? 8 : 6}" required placeholder="${signup ? "Minimum 8 characters" : "Your password"}"></div>
+            <div class="turnstile-wrap">
+              <div id="turnstile-widget" aria-label="Cloudflare security verification"></div>
+              <div class="help">Protected by Cloudflare Turnstile. Complete the security check before continuing.</div>
+            </div>
             <button class="btn btn-primary" type="submit">${signup ? "Create StorePOS account" : "Sign in"}</button>
             <button class="btn btn-secondary" type="button" id="resend-confirmation">Resend verification email</button>
             <a href="#/" class="btn btn-secondary">Back to website</a>
@@ -708,6 +778,7 @@ function renderAuth() {
   });
   document.querySelector("#auth-form")?.addEventListener("submit", handleAuth);
   document.querySelector("#resend-confirmation")?.addEventListener("click", resendConfirmation);
+  mountTurnstile();
 }
 
 async function resendConfirmation() {
@@ -749,6 +820,14 @@ async function resendConfirmation() {
 async function handleAuth(event) {
   event.preventDefault();
   if (state.busy) return;
+
+  const captchaToken = state.turnstileToken;
+  if (!captchaToken) {
+    toast("Complete the Cloudflare security check first.", "error");
+    mountTurnstile();
+    return;
+  }
+
   state.busy = true;
   const form = new FormData(event.currentTarget);
   const email = String(form.get("email") || "").trim();
@@ -766,7 +845,8 @@ async function handleAuth(event) {
         password,
         options: {
           data: { display_name: displayName },
-          emailRedirectTo: EMAIL_CONFIRM_GATE
+          emailRedirectTo: EMAIL_CONFIRM_GATE,
+          captchaToken
         }
       });
       if (error) throw error;
@@ -782,7 +862,11 @@ async function handleAuth(event) {
         renderAuth();
       }
     } else {
-      const { data, error } = await supabase.auth.signInWithPassword({ email, password });
+      const { data, error } = await supabase.auth.signInWithPassword({
+        email,
+        password,
+        options: { captchaToken }
+      });
       if (error) throw error;
       state.session = data.session;
       await loadAccessContext();
@@ -793,6 +877,7 @@ async function handleAuth(event) {
     toast(friendlyError(error), "error");
   } finally {
     state.busy = false;
+    if (!state.session) resetTurnstile();
     if (button?.isConnected) {
       button.disabled = false;
       button.textContent = original;

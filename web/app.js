@@ -156,7 +156,8 @@ const FEATURE_LABELS = {
   multi_branch: "Multi-branch",
   stock_transfers: "Stock transfers",
   priority_support: "Priority support",
-  support: "Support"
+  support: "Support",
+  paymongo_payments: "PayMongo automatic payments"
 };
 
 const PAGE_FEATURES = {
@@ -2249,7 +2250,8 @@ async function openCustomLicenseRequest(root) {
   if(error||!plans?.length) return toast(friendlyError(error||new Error("No active plans found.")),"error");
 
   const planMap=Object.fromEntries(plans.map(p=>[p.code,p]));
-  const allFeatures=[...new Set(plans.flatMap(p=>Array.isArray(p.features)?p.features:[]))];
+  const customOnlyFeatures=["paymongo_payments"];
+  const allFeatures=[...new Set([...plans.flatMap(p=>Array.isArray(p.features)?p.features:[]),...customOnlyFeatures])];
 
   showModal(`
     <h2>Request a custom StorePOS license</h2>
@@ -2269,8 +2271,8 @@ async function openCustomLicenseRequest(root) {
         <div class="field"><label>SUNMI V2 units (optional)</label><input class="input" type="number" min="0" max="100" step="1" name="sunmi_v2_quantity" value="0"><div class="help">Hardware price is quoted separately.</div></div>
       </div>
       <div class="field"><label>Modules</label><div class="feature-picker" id="custom-order-features">
-        ${allFeatures.map(code=>`<label><input type="checkbox" name="feature" value="${esc(code)}"><span>${esc(featureLabel(code))}</span></label>`).join("")}
-      </div></div>
+        ${allFeatures.map(code=>`<label><input type="checkbox" name="feature" value="${esc(code)}"><span>${esc(featureLabel(code))}${code==="paymongo_payments"?' <small class="help">Custom add-on</small>':""}</span></label>`).join("")}
+      </div><div class="help">PayMongo automatic payments is a custom add-on. Each StorePOS client connects their own PayMongo merchant account and receives payments directly into that account.</div></div>
       <div class="field"><label>Special requirements</label><textarea class="input" name="notes" maxlength="4000" placeholder="Example: 5 POS tablets, 15 staff, service + inventory + multi-branch only, custom annual billing…"></textarea></div>
       <div class="modal-actions"><button type="button" id="close-custom-order" class="btn btn-secondary">Cancel</button><button type="submit" class="btn btn-primary">Submit custom order</button></div>
     </form>`);
@@ -2381,6 +2383,16 @@ async function exportFullBackup(){
 }
 
 async function pageSettings(root) {
+  const paymongoAllowed=entitlementFeatures().includes("paymongo_payments");
+  let paymongo=null;
+  if(paymongoAllowed){
+    const {data,error}=await supabase.from("paymongo_integrations")
+      .select("shop_id,enabled,mode,secret_key_last4,webhook_secret_last4,webhook_id,webhook_status,payment_method_types,pass_on_fees,send_email_receipt,connected_at,updated_at")
+      .eq("shop_id",state.shop.id).maybeSingle();
+    if(error) throw error;
+    paymongo=data||null;
+  }
+
   root.innerHTML = `
     ${head("Settings","Shop identity, backup and export tools")}
     <div class="grid-2">
@@ -2407,7 +2419,64 @@ async function pageSettings(root) {
         </div>
         <div class="verify-note"><strong>Cloud safety</strong><span>Supabase also maintains platform database backups. This export is an additional shop-owned portable copy.</span></div>
       </div>
-    </div>`;
+    </div>
+    ${paymongoAllowed?`
+      <div class="card" style="margin-top:14px">
+        <div class="card-title">
+          <div>
+            <h3>PayMongo Automatic Payments</h3>
+            <span>Custom integration · this shop uses its own PayMongo merchant account.</span>
+          </div>
+          ${paymongo?.enabled?pill("active"):pill("not connected")}
+        </div>
+        <div class="verify-note">
+          <strong>Per-client merchant account</strong>
+          <span>StorePOS never shares one PayMongo account across clients. Your secret key is sent only to the secure StorePOS server and stored encrypted in Supabase Vault; it is never displayed again.</span>
+        </div>
+        ${paymongo?.enabled?`
+          <div class="stat-list" style="margin-bottom:14px">
+            <div class="stat-row"><span>Environment</span><strong>${esc(String(paymongo.mode||"test").toUpperCase())}</strong></div>
+            <div class="stat-row"><span>PayMongo secret key</span><strong>••••${esc(paymongo.secret_key_last4||"")}</strong></div>
+            <div class="stat-row"><span>Webhook signing secret</span><strong>••••${esc(paymongo.webhook_secret_last4||"")}</strong></div>
+            <div class="stat-row"><span>Webhook</span><strong>${esc(paymongo.webhook_status||"enabled")}</strong></div>
+            <div class="stat-row"><span>Connected</span><strong>${niceDate(paymongo.connected_at,true)}</strong></div>
+          </div>
+        `:""}
+        <form id="paymongo-settings-form" class="form">
+          <div class="field">
+            <label>${paymongo?.enabled?"Replace / rotate PayMongo Secret Key":"PayMongo Secret Key"}</label>
+            <input class="input" type="password" name="secret_key" autocomplete="new-password" placeholder="sk_test_... or sk_live_..." required>
+            <div class="help">Use the secret key from this client's own PayMongo dashboard. Never use StorePOS developer credentials here.</div>
+          </div>
+          <div class="field">
+            <label>Accepted methods</label>
+            <div class="feature-picker">
+              ${[
+                ["gcash","GCash"],
+                ["paymaya","Maya"],
+                ["qrph","QR Ph"],
+                ["card","Card"]
+              ].map(([code,label])=>`<label><input type="checkbox" name="paymongo_method" value="${code}" ${(!paymongo||!Array.isArray(paymongo.payment_method_types)||paymongo.payment_method_types.includes(code))?"checked":""}><span>${label}</span></label>`).join("")}
+            </div>
+          </div>
+          <div class="grid-2">
+            <label style="display:flex;gap:9px;align-items:center"><input type="checkbox" name="send_email_receipt" ${paymongo?.send_email_receipt?"checked":""}> <span>PayMongo email receipt</span></label>
+            <label style="display:flex;gap:9px;align-items:center"><input type="checkbox" name="pass_on_fees" ${paymongo?.pass_on_fees?"checked":""}> <span>Pass supported fees to customer</span></label>
+          </div>
+          <div class="modal-actions" style="justify-content:flex-start">
+            <button class="btn btn-primary" type="submit">${paymongo?.enabled?"Update PayMongo connection":"Connect PayMongo"}</button>
+            ${paymongo?.enabled?'<button class="btn btn-secondary" type="button" id="disconnect-paymongo">Disconnect</button>':""}
+          </div>
+        </form>
+      </div>
+    `:`
+      <div class="card" style="margin-top:14px">
+        <div class="card-title"><h3>PayMongo Automatic Payments</h3><span>Custom StorePOS add-on</span></div>
+        <p class="help">This integration is available when <strong>PayMongo automatic payments</strong> is included in the shop's custom StorePOS license. Each client connects their own merchant account.</p>
+        <button class="btn btn-secondary" type="button" id="request-paymongo-addon">Request in Custom License</button>
+      </div>
+    `}
+  `;
   document.querySelector("#shop-settings")?.addEventListener("submit", async event => {
     event.preventDefault();
     const f = new FormData(event.currentTarget);
@@ -2432,6 +2501,51 @@ async function pageSettings(root) {
     const btn=event.currentTarget;btn.disabled=true;btn.textContent="Preparing…";
     try{await exportFullBackup();}catch(error){toast(friendlyError(error),"error");}
     btn.disabled=false;btn.textContent="Full JSON Backup";
+  });
+
+  document.querySelector("#request-paymongo-addon")?.addEventListener("click",()=>{
+    setHash("dashboard/license");
+    setTimeout(()=>document.querySelector("#request-custom-license-card")?.click(),80);
+  });
+
+  document.querySelector("#paymongo-settings-form")?.addEventListener("submit",async event=>{
+    event.preventDefault();
+    const form=event.currentTarget;
+    const fd=new FormData(form);
+    const methods=[...form.querySelectorAll('input[name="paymongo_method"]:checked')].map(x=>x.value);
+    if(!methods.length) return toast("Choose at least one PayMongo payment method.","error");
+    const button=form.querySelector('button[type="submit"]');
+    const original=button.textContent;
+    button.disabled=true;button.textContent="Connecting securely…";
+    try{
+      const {data,error}=await supabase.functions.invoke("storepos-paymongo-admin",{
+        body:{
+          action:"connect",
+          shop_id:state.shop.id,
+          secret_key:String(fd.get("secret_key")||"").trim(),
+          payment_method_types:methods,
+          pass_on_fees:fd.get("pass_on_fees")==="on",
+          send_email_receipt:fd.get("send_email_receipt")==="on"
+        }
+      });
+      if(error) throw error;
+      if(data?.error) throw new Error(data.error);
+      toast("PayMongo merchant account connected. Webhook verification is active.","success");
+      await pageSettings(root);
+    }catch(error){
+      toast(friendlyError(error),"error");
+      button.disabled=false;button.textContent=original;
+    }
+  });
+
+  document.querySelector("#disconnect-paymongo")?.addEventListener("click",async()=>{
+    if(!confirm("Disconnect PayMongo automatic payments for this shop? Existing payment history will be kept.")) return;
+    const {data,error}=await supabase.functions.invoke("storepos-paymongo-admin",{
+      body:{action:"disconnect",shop_id:state.shop.id}
+    });
+    if(error||data?.error) return toast(friendlyError(error||new Error(data.error)),"error");
+    toast("PayMongo disconnected for this shop.","success");
+    await pageSettings(root);
   });
 }
 

@@ -786,10 +786,17 @@ async function resendConfirmation() {
   const emailInput = form?.querySelector('input[name="email"]');
   const email = String(emailInput?.value || "").trim();
   const button = document.querySelector("#resend-confirmation");
+  const captchaToken = state.turnstileToken;
 
   if (!email) {
     toast("Enter your email address first.", "error");
     emailInput?.focus();
+    return;
+  }
+
+  if (!captchaToken) {
+    toast("Complete the Cloudflare security check first.", "error");
+    mountTurnstile();
     return;
   }
 
@@ -803,13 +810,17 @@ async function resendConfirmation() {
     const { error } = await supabase.auth.resend({
       type: "signup",
       email,
-      options: { emailRedirectTo: EMAIL_CONFIRM_GATE }
+      options: {
+        emailRedirectTo: EMAIL_CONFIRM_GATE,
+        captchaToken
+      }
     });
     if (error) throw error;
     toast("Verification email requested. Check Inbox and Spam/Junk.", "success");
   } catch (error) {
     toast(friendlyError(error), "error");
   } finally {
+    resetTurnstile();
     if (button?.isConnected) {
       button.disabled = false;
       button.textContent = original;

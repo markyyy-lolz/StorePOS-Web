@@ -13,3 +13,15 @@ POS, inventory, barcode/SKU, customers, suppliers, cashier operations, receivabl
 
 ## Deployment
 GitHub Pages is deployed from the `web/` directory by GitHub Actions.
+
+
+## v1.3.0
+- Retail Control Center
+- Price checker
+- Existing barcode-assisted physical stocktake surfaced in cloud operations
+- Supplier cost comparison with reorder-to-PO suggestions
+- GCash/Maya/card/bank reconciliation
+- Live X reports plus existing finalized Z reports
+- Manager approval queue
+- Audited receipt reprints with numbered copies
+- StorePOS data-health checks

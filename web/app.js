@@ -2387,7 +2387,7 @@ async function pageSettings(root) {
   let paymongo=null;
   if(paymongoAllowed){
     const {data,error}=await supabase.from("paymongo_integrations")
-      .select("shop_id,enabled,mode,secret_key_last4,webhook_secret_last4,webhook_id,webhook_status,payment_method_types,pass_on_fees,send_email_receipt,connected_at,updated_at")
+      .select("shop_id,enabled,mode,public_key_last4,secret_key_last4,webhook_secret_last4,webhook_id,webhook_status,payment_method_types,pass_on_fees,send_email_receipt,connected_at,updated_at")
       .eq("shop_id",state.shop.id).maybeSingle();
     if(error) throw error;
     paymongo=data||null;
@@ -2436,6 +2436,7 @@ async function pageSettings(root) {
         ${paymongo?.enabled?`
           <div class="stat-list" style="margin-bottom:14px">
             <div class="stat-row"><span>Environment</span><strong>${esc(String(paymongo.mode||"test").toUpperCase())}</strong></div>
+            <div class="stat-row"><span>PayMongo public key</span><strong>••••${esc(paymongo.public_key_last4||"")}</strong></div>
             <div class="stat-row"><span>PayMongo secret key</span><strong>••••${esc(paymongo.secret_key_last4||"")}</strong></div>
             <div class="stat-row"><span>Webhook signing secret</span><strong>••••${esc(paymongo.webhook_secret_last4||"")}</strong></div>
             <div class="stat-row"><span>Webhook</span><strong>${esc(paymongo.webhook_status||"enabled")}</strong></div>
@@ -2443,6 +2444,11 @@ async function pageSettings(root) {
           </div>
         `:""}
         <form id="paymongo-settings-form" class="form">
+          <div class="field">
+            <label>${paymongo?.enabled?"Replace / rotate PayMongo Public Key":"PayMongo Public Key"}</label>
+            <input class="input" type="password" name="public_key" autocomplete="new-password" placeholder="pk_test_... or pk_live_..." required>
+            <div class="help">Required for native QR Ph creation. Use the public key from the same PayMongo Test/Live environment as the secret key.</div>
+          </div>
           <div class="field">
             <label>${paymongo?.enabled?"Replace / rotate PayMongo Secret Key":"PayMongo Secret Key"}</label>
             <input class="input" type="password" name="secret_key" autocomplete="new-password" placeholder="sk_test_... or sk_live_..." required>
@@ -2522,6 +2528,7 @@ async function pageSettings(root) {
         body:{
           action:"connect",
           shop_id:state.shop.id,
+          public_key:String(fd.get("public_key")||"").trim(),
           secret_key:String(fd.get("secret_key")||"").trim(),
           payment_method_types:methods,
           pass_on_fees:fd.get("pass_on_fees")==="on",
@@ -2530,7 +2537,7 @@ async function pageSettings(root) {
       });
       if(error) throw error;
       if(data?.error) throw new Error(data.error);
-      toast("PayMongo merchant account connected. Webhook verification is active.","success");
+      toast("PayMongo connected. Native QR Ph and webhook verification are active.","success");
       await pageSettings(root);
     }catch(error){
       toast(friendlyError(error),"error");

@@ -1,4 +1,5 @@
 import { createClient } from "https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.117.2/+esm";
+import { pageRetail, renderDigitalReceipt } from "./retail.js?v=20261005-v110";
 
 const SUPABASE_URL = "https://qgyzdoltjlryjthxxscw.supabase.co";
 const SUPABASE_KEY = "sb_publishable_mCjtfE-W75s1yyUdw2NY2g_z6ic5DIc";
@@ -112,17 +113,17 @@ function currentPath() {
 
 function rolePages(role) {
   const r = String(role || "").toLowerCase();
-  const full = ["overview","sales","inventory","customers","staff","suppliers","operations","branches","reports","support","license","devices","settings"];
+  const full = ["overview","sales","inventory","retail","customers","staff","suppliers","operations","branches","reports","support","license","devices","settings"];
   if (["owner","admin","manager"].includes(r)) return full;
-  if (r === "cashier") return ["overview","sales","customers","operations","support","license"];
-  if (r === "inventory") return ["overview","inventory","suppliers","operations","support","license"];
-  if (r === "mechanic") return ["overview","sales","inventory","customers","operations","support","license"];
+  if (r === "cashier") return ["overview","sales","retail","customers","operations","support","license"];
+  if (r === "inventory") return ["overview","inventory","retail","suppliers","operations","support","license"];
+  if (r === "mechanic") return ["overview","sales","inventory","retail","customers","operations","support","license"];
   return ["overview","support","license"];
 }
 
 function navLabel(page) {
   return ({
-    overview:"Overview", sales:"Sales", inventory:"Inventory", customers:"Customers",
+    overview:"Overview", sales:"Sales", inventory:"Inventory", retail:"Retail Suite", customers:"Customers",
     staff:"Staff", suppliers:"Suppliers", operations:"Operations", branches:"Branches", reports:"Reports",
     support:"Support Chat", license:"License", devices:"Devices", settings:"Settings"
   })[page] || page;
@@ -131,6 +132,7 @@ function navLabel(page) {
 const FEATURE_LABELS = {
   pos: "Point of Sale",
   inventory: "Inventory",
+  retail_suite: "Advanced Retail Suite",
   customers: "Customers",
   quotations: "Quotations",
   basic_reports: "Basic reports",
@@ -155,6 +157,7 @@ const FEATURE_LABELS = {
 const PAGE_FEATURES = {
   sales: ["pos"],
   inventory: ["inventory"],
+  retail: ["retail_suite","inventory","operations","pos"],
   customers: ["customers"],
   staff: ["staff"],
   suppliers: ["suppliers"],
@@ -907,6 +910,7 @@ async function loadDashboardPage(page) {
       case "overview": return await pageOverview(root);
       case "sales": return await pageSales(root);
       case "inventory": return await pageInventory(root);
+      case "retail": return await pageRetail(root, retailContext());
       case "customers": return await pageCustomers(root);
       case "staff": return await pageStaff(root);
       case "suppliers": return await pageSuppliers(root);
@@ -926,6 +930,10 @@ async function loadDashboardPage(page) {
 
 function head(title, subtitle, action = "") {
   return `<div class="page-head"><div><h1>${esc(title)}</h1><p>${esc(subtitle)}</p></div>${action}</div>`;
+}
+
+function retailContext() {
+  return { supabase, state, money, number, esc, niceDate, pill, head, toast, showModal, closeModal, friendlyError };
 }
 
 async function pageOverview(root) {
@@ -3135,6 +3143,12 @@ async function route() {
 
   if (path === "manual") {
     renderManual();
+    return;
+  }
+
+  if (path.startsWith("receipt/")) {
+    const token = path.slice("receipt/".length).split("?")[0].trim();
+    await renderDigitalReceipt(app, retailContext(), token);
     return;
   }
 

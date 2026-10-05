@@ -1,7 +1,7 @@
 {
-  "version": "1.1.0",
+  "version": "1.3.0",
   "app_code": "storepos",
   "product": "StorePOS Cloud",
   "released_at": "2026-10-05",
-  "summary": "Advanced Retail Suite: pack/tingi, wholesale, variants, batches, serials, promos, reservations, credit, pricing intelligence, labels and digital receipts."
+  "summary": "Retail Control Center: price checker, stocktake controls, supplier cost comparison and PO suggestions, e-wallet reconciliation, X/Z reporting, manager approvals, receipt reprint audit, and data health checks."
 }

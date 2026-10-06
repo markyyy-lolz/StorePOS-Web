@@ -517,6 +517,7 @@ export async function renderDigitalReceipt(app, ctx, token) {
         '<span class="eyebrow">Digital receipt</span>',
         '<h1>This digital receipt has expired.</h1>',
         '<p>For privacy and security, StorePOS digital receipts are available for 3 days after purchase.</p>',
+        r.shop?'<p><strong>'+ctx.esc(r.shop)+'</strong></p>':'',
         r.expires_at?'<div class="verify-note"><strong>Expired</strong><span>'+ctx.esc(ctx.niceDate(r.expires_at,true))+'</span></div>':'',
         '<p class="help" style="margin-top:18px">Please contact the store if you need another receipt copy.</p>',
         '<div style="margin-top:24px;padding-top:16px;border-top:1px solid var(--line,#e5e7eb)" class="help">Powered by <strong>StorePOS</strong> · Retail Management & POS System</div>',
@@ -528,49 +529,80 @@ export async function renderDigitalReceipt(app, ctx, token) {
   const items=Array.isArray(r.items)?r.items:[];
   const charges=Array.isArray(r.charges)?r.charges:[];
   const payments=Array.isArray(r.payments)?r.payments:[];
+  const s=r.receipt_settings||{};
+  const allowed=['meta','items','totals','payment','digital'];
+  const requested=Array.isArray(s.section_order)?s.section_order.filter(function(x){return allowed.includes(x);}):[];
+  const order=[...new Set(requested)];
+  allowed.forEach(function(x){if(!order.includes(x))order.push(x);});
 
-  app.innerHTML=[
-    '<div class="setup"><div class="setup-card" style="max-width:680px">',
-      '<div style="text-align:center">',
-        '<span class="eyebrow">Verified digital receipt</span>',
-        '<h1 style="margin-bottom:6px">',ctx.esc(r.shop||'Retail Store'),'</h1>',
-        r.address?'<p style="margin-top:0">'+ctx.esc(r.address)+'</p>':'',
+  const metaBits=[];
+  if(s.show_receipt_number!==false) metaBits.push('<strong>'+ctx.esc(r.sale_number||'Sale')+'</strong>');
+  const metaText=[];
+  if(s.show_date!==false) metaText.push(ctx.esc(ctx.niceDate(r.created_at,true)));
+  metaText.push(ctx.esc(String(r.status||'completed').toUpperCase()));
+
+  const sections={
+    meta: (metaBits.length||metaText.length)
+      ? '<div class="verify-note" style="margin-top:18px">'+
+          (metaBits.join(''))+
+          '<span>'+metaText.join(' · ')+'</span>'+
+        '</div>'
+      : '',
+    items: '<div class="stat-list" style="margin-top:18px">'+
+        items.map(function(i){return row(ctx.esc(i.name||'Item'),ctx.money(i.line_total),qty(i.quantity)+' '+ctx.esc(i.unit||'pc')+' × '+ctx.money(i.unit_price));}).join('')+
+        charges.map(function(ch){return row(ctx.esc(ch.name||'Charge'),ctx.money(ch.amount),'Additional charge');}).join('')+
       '</div>',
-      '<div class="verify-note" style="margin-top:18px"><strong>',ctx.esc(r.sale_number||'Sale'),'</strong><span>',ctx.esc(ctx.niceDate(r.created_at,true)),' · ',ctx.esc(String(r.status||'completed').toUpperCase()),'</span></div>',
-
-      '<div class="stat-list" style="margin-top:18px">',
-        items.map(function(i){return row(ctx.esc(i.name||'Item'),ctx.money(i.line_total),qty(i.quantity)+' '+ctx.esc(i.unit||'pc')+' × '+ctx.money(i.unit_price));}).join(''),
-        charges.map(function(ch){return row(ctx.esc(ch.name||'Charge'),ctx.money(ch.amount),'Additional charge');}).join(''),
+    totals: '<div class="stat-list" style="margin-top:16px">'+
+        row('Subtotal',ctx.money(r.subtotal),'')+
+        (Number(r.discount||0)?row('Discount','− '+ctx.money(r.discount),''):'')+
+        (Number(r.tax||0)?row('Tax',ctx.money(r.tax),''):'')+
+        row('TOTAL',ctx.money(r.total),'')+
+        (Number(r.change||0)>0?row('Change',ctx.money(r.change),''):'')+
       '</div>',
-
-      '<div class="stat-list" style="margin-top:16px">',
-        row('Subtotal',ctx.money(r.subtotal),''),
-        Number(r.discount||0)?row('Discount','− '+ctx.money(r.discount),''):'',
-        Number(r.tax||0)?row('Tax',ctx.money(r.tax),''):'',
-        row('TOTAL',ctx.money(r.total),''),
-        Number(r.change||0)>0?row('Change',ctx.money(r.change),''):'',
-      '</div>',
-
-      payments.length?[
+    payment: payments.length?[
         '<div class="card" style="margin-top:18px;padding:16px">',
           '<span class="eyebrow">Payment details</span>',
           '<div class="stat-list" style="margin-top:10px">',
             payments.map(function(p){
+              const ref=(s.show_payment_reference===false||!p.reference)?'':' · Ref '+p.reference;
               return row(
                 ctx.esc(p.method||'PAYMENT'),
                 ctx.money(p.amount),
-                ctx.esc((p.status||'PAID')+(p.reference?' · Ref '+p.reference:''))
+                ctx.esc((p.status||'PAID')+ref)
               );
             }).join(''),
           '</div>',
         '</div>'
       ].join(''):'',
+    digital: [
+      '<div class="verify-note" style="margin-top:18px"><strong>Digital receipt availability</strong><span>Available until ',
+      ctx.esc(ctx.niceDate(r.expires_at,true)),
+      '</span></div>',
+      '<p class="help" style="margin-top:10px">This secure digital receipt is available for 3 days from the original purchase time.</p>'
+    ].join('')
+  };
 
-      '<div class="verify-note" style="margin-top:18px"><strong>Digital receipt availability</strong><span>Available until ',ctx.esc(ctx.niceDate(r.expires_at,true)),'</span></div>',
-      '<p class="help" style="margin-top:10px">This secure digital receipt is available for 3 days from the original purchase time.</p>',
+  const identity=[
+    '<div style="text-align:center">',
+      (s.show_logo===true&&r.logo_url)
+        ? '<img src="'+ctx.esc(r.logo_url)+'" alt="" style="width:82px;height:82px;object-fit:contain;border-radius:18px;margin-bottom:10px">'
+        : '',
+      '<span class="eyebrow">Verified digital receipt</span>',
+      '<h1 style="margin-bottom:6px">',ctx.esc(r.shop||'Retail Store'),'</h1>',
+      (s.show_address!==false&&r.address)?'<p style="margin:2px 0">'+ctx.esc(r.address)+'</p>':'',
+      (s.show_phone!==false&&r.phone)?'<p style="margin:2px 0">Contact: '+ctx.esc(r.phone)+'</p>':'',
+      (s.show_tin!==false&&r.tin)?'<p style="margin:2px 0">TIN: '+ctx.esc(r.tin)+'</p>':'',
+      s.header?'<p style="margin:10px 0 0">'+ctx.esc(s.header).replace(/\n/g,'<br>')+'</p>':'',
+      '<h2 style="margin:14px 0 0;font-size:1rem;letter-spacing:.08em">',ctx.esc(s.title||'SALES RECEIPT'),'</h2>',
+    '</div>'
+  ].join('');
 
+  app.innerHTML=[
+    '<div class="setup"><div class="setup-card" style="max-width:',s.compact_mode?'620':'680','px">',
+      identity,
+      order.map(function(key){return sections[key]||'';}).join(''),
       '<div class="modal-actions" style="margin-top:20px"><button class="btn btn-primary" id="receipt-print">Print receipt</button></div>',
-
+      s.footer?'<div style="margin-top:22px;text-align:center"><p>'+ctx.esc(s.footer).replace(/\n/g,'<br>')+'</p></div>':'',
       '<div style="margin-top:26px;padding-top:16px;border-top:1px solid var(--line,#e5e7eb);text-align:center" class="help">',
         'Powered by <strong>StorePOS</strong> · Retail Management & POS System',
       '</div>',

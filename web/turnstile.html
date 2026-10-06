@@ -75,6 +75,9 @@
           action,
           callback(token) {
             bridge("onToken", token);
+            try {
+              location.href = "storepos://turnstile?token=" + encodeURIComponent(token);
+            } catch (_) {}
           },
           "expired-callback"() {
             bridge("onExpired");

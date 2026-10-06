@@ -498,27 +498,51 @@ export async function pageRetail(root, ctx) {
 
 export async function renderDigitalReceipt(app, ctx, token) {
   if (!token) {
-    app.innerHTML='<div class="setup"><div class="setup-card"><h1>Receipt link required</h1><p>This StorePOS digital receipt link is incomplete.</p><a class="btn btn-secondary" href="#/">StorePOS</a></div></div>';
+    app.innerHTML='<div class="setup"><div class="setup-card"><h1>Receipt link required</h1><p>This digital receipt link is incomplete.</p><a class="btn btn-secondary" href="#/">StorePOS</a></div></div>';
     return;
   }
-  app.innerHTML='<div class="setup"><div class="setup-card"><div class="brand"><span class="brand-logo">S</span><span>StorePOS</span></div><h1>Loading receipt…</h1></div></div>';
+
+  app.innerHTML='<div class="setup"><div class="setup-card"><h1>Loading digital receipt…</h1><p>Please wait while the receipt is verified.</p></div></div>';
   const result=await ctx.supabase.rpc('storepos_receipt',{p_token:token});
+
   if(result.error||!result.data){
-    app.innerHTML='<div class="setup"><div class="setup-card"><div class="brand"><span class="brand-logo">S</span><span>StorePOS</span></div><h1>Receipt unavailable</h1><p>'+ctx.esc(ctx.friendlyError(result.error||new Error('Receipt not found.')))+'</p></div></div>';
+    app.innerHTML='<div class="setup"><div class="setup-card"><h1>Receipt unavailable</h1><p>'+ctx.esc(ctx.friendlyError(result.error||new Error('Receipt not found.')))+'</p><p class="help">Please contact the store if you need another copy.</p><div style="height:14px"></div><div class="help">Powered by StorePOS</div></div></div>';
     return;
   }
+
   const r=result.data;
+  if(r.expired){
+    app.innerHTML=[
+      '<div class="setup"><div class="setup-card" style="max-width:620px;text-align:center">',
+        '<span class="eyebrow">Digital receipt</span>',
+        '<h1>This digital receipt has expired.</h1>',
+        '<p>For privacy and security, StorePOS digital receipts are available for 3 days after purchase.</p>',
+        r.expires_at?'<div class="verify-note"><strong>Expired</strong><span>'+ctx.esc(ctx.niceDate(r.expires_at,true))+'</span></div>':'',
+        '<p class="help" style="margin-top:18px">Please contact the store if you need another receipt copy.</p>',
+        '<div style="margin-top:24px;padding-top:16px;border-top:1px solid var(--line,#e5e7eb)" class="help">Powered by <strong>StorePOS</strong> · Retail Management & POS System</div>',
+      '</div></div>'
+    ].join('');
+    return;
+  }
+
   const items=Array.isArray(r.items)?r.items:[];
   const charges=Array.isArray(r.charges)?r.charges:[];
+  const payments=Array.isArray(r.payments)?r.payments:[];
+
   app.innerHTML=[
-    '<div class="setup"><div class="setup-card" style="max-width:620px">',
-      '<div class="brand"><span class="brand-logo">S</span><span>StorePOS Digital Receipt</span></div>',
-      '<div style="height:14px"></div><span class="eyebrow">Verified digital receipt</span><h1>',ctx.esc(r.shop||'StorePOS Shop'),'</h1><p>',ctx.esc(r.address||''),'</p>',
-      '<div class="verify-note"><strong>',ctx.esc(r.sale_number||'Sale'),'</strong><span>',ctx.esc(ctx.niceDate(r.created_at,true)),' · ',ctx.esc(r.status||'completed'),'</span></div>',
-      '<div class="stat-list" style="margin-top:16px">',
-        items.map(function(i){return row(ctx.esc(i.name||'Item'),ctx.money(i.line_total),qty(i.quantity)+' '+ctx.esc(i.unit||'pc')+' × '+ctx.money(i.unit_price));}).join(''),
-        charges.map(function(c){return row(ctx.esc(c.name||'Charge'),ctx.money(c.amount),'Additional charge');}).join(''),
+    '<div class="setup"><div class="setup-card" style="max-width:680px">',
+      '<div style="text-align:center">',
+        '<span class="eyebrow">Verified digital receipt</span>',
+        '<h1 style="margin-bottom:6px">',ctx.esc(r.shop||'Retail Store'),'</h1>',
+        r.address?'<p style="margin-top:0">'+ctx.esc(r.address)+'</p>':'',
       '</div>',
+      '<div class="verify-note" style="margin-top:18px"><strong>',ctx.esc(r.sale_number||'Sale'),'</strong><span>',ctx.esc(ctx.niceDate(r.created_at,true)),' · ',ctx.esc(String(r.status||'completed').toUpperCase()),'</span></div>',
+
+      '<div class="stat-list" style="margin-top:18px">',
+        items.map(function(i){return row(ctx.esc(i.name||'Item'),ctx.money(i.line_total),qty(i.quantity)+' '+ctx.esc(i.unit||'pc')+' × '+ctx.money(i.unit_price));}).join(''),
+        charges.map(function(ch){return row(ctx.esc(ch.name||'Charge'),ctx.money(ch.amount),'Additional charge');}).join(''),
+      '</div>',
+
       '<div class="stat-list" style="margin-top:16px">',
         row('Subtotal',ctx.money(r.subtotal),''),
         Number(r.discount||0)?row('Discount','− '+ctx.money(r.discount),''):'',
@@ -526,9 +550,32 @@ export async function renderDigitalReceipt(app, ctx, token) {
         row('TOTAL',ctx.money(r.total),''),
         Number(r.change||0)>0?row('Change',ctx.money(r.change),''):'',
       '</div>',
-      '<div class="modal-actions" style="margin-top:18px"><button class="btn btn-primary" id="receipt-print">Print receipt</button><a class="btn btn-secondary" href="#/">StorePOS</a></div>',
-      '<p class="help" style="margin-top:14px">This link contains a random receipt token. Share it only with the customer who should see this receipt.</p>',
+
+      payments.length?[
+        '<div class="card" style="margin-top:18px;padding:16px">',
+          '<span class="eyebrow">Payment details</span>',
+          '<div class="stat-list" style="margin-top:10px">',
+            payments.map(function(p){
+              return row(
+                ctx.esc(p.method||'PAYMENT'),
+                ctx.money(p.amount),
+                ctx.esc((p.status||'PAID')+(p.reference?' · Ref '+p.reference:''))
+              );
+            }).join(''),
+          '</div>',
+        '</div>'
+      ].join(''):'',
+
+      '<div class="verify-note" style="margin-top:18px"><strong>Digital receipt availability</strong><span>Available until ',ctx.esc(ctx.niceDate(r.expires_at,true)),'</span></div>',
+      '<p class="help" style="margin-top:10px">This secure digital receipt is available for 3 days from the original purchase time.</p>',
+
+      '<div class="modal-actions" style="margin-top:20px"><button class="btn btn-primary" id="receipt-print">Print receipt</button></div>',
+
+      '<div style="margin-top:26px;padding-top:16px;border-top:1px solid var(--line,#e5e7eb);text-align:center" class="help">',
+        'Powered by <strong>StorePOS</strong> · Retail Management & POS System',
+      '</div>',
     '</div></div>'
   ].join('');
+
   document.querySelector('#receipt-print')?.addEventListener('click',function(){window.print();});
 }

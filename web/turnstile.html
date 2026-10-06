@@ -1,0 +1,102 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,viewport-fit=cover" />
+  <meta name="color-scheme" content="light" />
+  <title>StorePOS Security Verification</title>
+  <style>
+    * { box-sizing: border-box; }
+    html, body {
+      margin: 0;
+      width: 100%;
+      min-height: 100%;
+      background: transparent;
+      overflow: hidden;
+      font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    }
+    body {
+      min-height: 88px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 6px;
+    }
+    #turnstile {
+      width: 100%;
+      min-height: 65px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    #status {
+      display: none;
+      font-size: 13px;
+      color: #5b6470;
+      text-align: center;
+      padding: 8px;
+    }
+  </style>
+  <script src="https://challenges.cloudflare.com/turnstile/v0/api.js?render=explicit" defer></script>
+</head>
+<body>
+  <div id="turnstile"></div>
+  <div id="status">Loading security verification…</div>
+
+  <script>
+    (() => {
+      const SITE_KEY = "0x4AAAAAAFORduMdXxtZDB1o";
+      const params = new URLSearchParams(location.search);
+      const action = params.get("mode") === "signup" ? "storepos_signup" : "storepos_signin";
+      const status = document.querySelector("#status");
+
+      function bridge(name, value) {
+        try {
+          if (window.StorePosCaptcha && typeof window.StorePosCaptcha[name] === "function") {
+            value === undefined
+              ? window.StorePosCaptcha[name]()
+              : window.StorePosCaptcha[name](value);
+          }
+        } catch (_) {}
+      }
+
+      function render() {
+        if (!window.turnstile?.render) {
+          status.style.display = "block";
+          setTimeout(render, 100);
+          return;
+        }
+
+        status.style.display = "none";
+        window.turnstile.render("#turnstile", {
+          sitekey: SITE_KEY,
+          theme: "light",
+          size: "flexible",
+          action,
+          callback(token) {
+            bridge("onToken", token);
+          },
+          "expired-callback"() {
+            bridge("onExpired");
+          },
+          "timeout-callback"() {
+            bridge("onExpired");
+          },
+          "error-callback"() {
+            status.textContent = "Security verification could not load. Tap retry in StorePOS.";
+            status.style.display = "block";
+            bridge("onError", "turnstile_error");
+            return true;
+          }
+        });
+      }
+
+      if (document.readyState === "loading") {
+        document.addEventListener("DOMContentLoaded", render, { once: true });
+      } else {
+        render();
+      }
+    })();
+  </script>
+</body>
+</html>

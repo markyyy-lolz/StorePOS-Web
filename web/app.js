@@ -1,5 +1,5 @@
 import { createClient } from "https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.117.2/+esm";
-import { pageRetail, renderDigitalReceipt } from "./retail.js?v=20261005-v130";
+import { pageRetail, renderDigitalReceipt } from "./retail.js?v=20261006-receipt-v1";
 import { pageStoreOps } from "./ops13.js?v=20261005-v130";
 
 const SUPABASE_URL = "https://qgyzdoltjlryjthxxscw.supabase.co";

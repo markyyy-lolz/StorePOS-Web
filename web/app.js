@@ -974,7 +974,7 @@ function renderShell(page) {
 
       <div class="main">
         <header class="topbar">
-          <div class="topbar-title"><strong>${esc(state.shop?.name || "StorePOS Cloud")}</strong><span>Retail operations command center</span></div>
+          <div class="topbar-title"><strong>${esc(state.shop?.name || "StorePOS Cloud")}</strong><span>Cloud operations dashboard</span></div>
           <div class="toolbar"><a class="btn btn-secondary btn-sm" href="#/manual">Manual</a><div class="user-pill"><div class="avatar">${esc((state.user?.email || "M").slice(0,1).toUpperCase())}</div><div class="user-copy"><strong style="font-size:12px">${esc(state.user?.email || "")}</strong><div class="help">${esc(role)}</div></div></div></div>
         </header>
         <main id="page-content" class="content"><div class="loading-block"></div></main>
@@ -3443,3 +3443,5 @@ init().catch(error => {
   console.error(error);
   app.innerHTML = `<div class="setup"><div class="setup-card"><h1>StorePOS Cloud</h1><p>${esc(friendlyError(error))}</p><button class="btn btn-primary" onclick="location.reload()">Reload</button></div></div>`;
 });
+
+// StorePOS v1.4.1 MotoPOS UI parity.

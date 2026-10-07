@@ -1145,7 +1145,7 @@ function renderShell(page) {
 async function openGlobalSearch(rawQuery) {
   const query=String(rawQuery||"").trim();
   if(!query) return toast("Type something to search.","error");
-  const safe=query.replace(/[,%()]/g," ").trim();
+  const safe=query.replace(/[,%()]/g," ").trim() || query.replace(/[^a-z0-9@._ -]/gi," ").trim();
   showModal(`<div class="search-modal-head"><span class="section-kicker">Global search</span><h2>Searching StorePOS…</h2><p>${esc(query)}</p></div><div class="loading-block"></div>`);
   try{
     const [productsRes,customersRes,salesRes]=await Promise.all([
@@ -1438,7 +1438,7 @@ async function pageInventory(root) {
     ${head(
       "Inventory",
       "Products, pricing, stock levels and retail availability",
-      canManage ? '<div class="actions"><button id="open-category-manager" class="btn btn-secondary">Categories</button><button id="add-product" class="btn btn-primary">+ Add product</button></div>' : ""
+      canManage ? '<div class="actions"><button id="add-product" class="btn btn-primary">+ Add product</button></div>' : ""
     )}
     <section class="metrics retail-metrics compact">
       <article class="metric retail-metric"><div class="metric-icon green">▦</div><div><div class="metric-label">Active products</div><div class="metric-value">${number(activeProducts.length)}</div><div class="metric-sub">Available catalog items</div></div></article>
@@ -1503,7 +1503,6 @@ async function pageInventory(root) {
   document.querySelector("#inventory-status-filter")?.addEventListener("change",applyFilters);
 
   document.querySelector("#add-product")?.addEventListener("click",()=>openProductModal(root,null,categories));
-  document.querySelector("#open-category-manager")?.addEventListener("click",()=>window.StorePOSCategoryManager?.open?.({supabase,state,toast,showModal,closeModal,esc,friendlyError,onChanged:()=>pageInventory(root)}));
   root.querySelectorAll(".edit-product").forEach(btn=>{
     const product=products.find(p=>p.id===btn.dataset.id);
     btn.addEventListener("click",()=>openProductModal(root,product,categories));

@@ -25,3 +25,11 @@ GitHub Pages is deployed from the `web/` directory by GitHub Actions.
 - Manager approval queue
 - Audited receipt reprints with numbered copies
 - StorePOS data-health checks
+
+
+## v1.4.0 — Commercial UI Rework
+- Reworked the StorePOS public website into a retail-focused commercial product experience.
+- Redesigned the Cloud Console with a dark operational sidebar and clean light workspace.
+- Refined dashboard cards, tables, forms, modals, alerts, support, manual and customer-portal surfaces.
+- Improved retail product messaging and removed workshop-oriented positioning from the StorePOS landing page.
+- Improved responsive layouts for tablet and mobile browsers without changing existing StorePOS data workflows.

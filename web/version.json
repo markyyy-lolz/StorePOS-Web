@@ -1,7 +1,7 @@
 {
-  "version": "1.3.0",
+  "version": "1.3.1",
   "app_code": "storepos",
   "product": "StorePOS Cloud",
-  "released_at": "2026-10-05",
-  "summary": "Retail Control Center: price checker, stocktake controls, supplier cost comparison and PO suggestions, e-wallet reconciliation, X/Z reporting, manager approvals, receipt reprint audit, and data health checks."
+  "released_at": "2026-10-07",
+  "summary": "Inventory Category Manager: add categories from the product form, manage names and descriptions, reorder categories, enable or disable categories, and keep category assignments synced through StorePOS Cloud."
 }

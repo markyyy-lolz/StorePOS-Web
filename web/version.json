@@ -1,7 +1,7 @@
 {
-  "version": "1.3.1",
+  "version": "1.4.0",
   "app_code": "storepos",
   "product": "StorePOS Cloud",
   "released_at": "2026-10-07",
-  "summary": "Inventory Category Manager: add categories from the product form, manage names and descriptions, reorder categories, enable or disable categories, and keep category assignments synced through StorePOS Cloud."
+  "summary": "Commercial UI rework: cleaner retail-focused public site, modern light cloud workspace, polished dark navigation, refined cards/tables/forms, and improved responsive presentation."
 }

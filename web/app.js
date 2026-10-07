@@ -556,8 +556,8 @@ function renderLanding() {
         <section class="hero">
           <div>
             <span class="eyebrow">Retail shop operating system</span>
-            <h1>Parts, workshop and sales.<br><span class="gradient-text">One StorePOS Cloud.</span></h1>
-            <p>Manage retail parts, customers, service jobs, staff access, receipts, devices and licensing from one cloud-connected system built for real shop operations.</p>
+            <h1>Run your retail business.<br><span class="gradient-text">One StorePOS Cloud.</span></h1>
+            <p>Manage checkout, inventory, customers, purchasing, staff, reports, receipts, devices and licensing from one cloud-connected system built for real retail operations.</p>
             <div class="hero-actions">
               <a class="btn btn-primary" href="#/login?mode=signup">Start 7-day Pro trial</a>
               <a class="btn btn-secondary" href="#/login">Open dashboard</a>
@@ -592,14 +592,14 @@ function renderLanding() {
 
         <section class="section">
           <div class="section-head">
-            <div><span class="kicker">Built for operations</span><h2>Everything your shop needs.</h2></div>
-            <p>Android is your cashier terminal. StorePOS Cloud is the control center for owners and managers.</p>
+            <div><span class="kicker">Built for operations</span><h2>Your complete retail operating system.</h2></div>
+            <p>Android handles the counter. StorePOS Cloud gives owners and managers one command center for sales, stock and day-to-day operations.</p>
           </div>
           <div class="feature-grid">
             ${[
               ["POS","Fast product lookup, checkout and receipt workflows."],
               ["Inventory","Stock levels, reorder alerts, cost and selling prices."],
-              ["Workshop","Retail profiles, service history and job statuses."],
+              ["Retail Control","Approvals, reconciliation and day-to-day store controls."],
               ["Staff","Role-aware access for owners, managers and cashiers."],
               ["Reports","Sales, expenses, transactions and operating summaries."],
               ["Licensing","Plans, device limits, staff limits and remote suspension."]
@@ -643,7 +643,7 @@ function renderLanding() {
             <div class="founder-copy">
               <span class="kicker">Meet the developer</span>
               <h2>Hi, I’m Mark Reymuel Pascual.</h2>
-              <p>I’m the developer behind StorePOS, building practical digital tools for real workflows. StorePOS is focused on helping retail shops manage sales, inventory, service jobs, staff access, customers, support, and cloud operations in one connected system.</p>
+              <p>I’m the developer behind StorePOS, building practical digital tools for real workflows. StorePOS is focused on helping retail shops manage checkout, inventory, purchasing, staff access, customers, reporting, support and cloud operations in one connected system.</p>
               <p class="founder-note">Have a question, suggestion, partnership idea, or need help with StorePOS? You can contact me directly on Facebook.</p>
               <div class="founder-actions">
                 <a class="btn btn-primary" href="https://facebook.com/profile.php?id=61590474910314" target="_blank" rel="noopener noreferrer">Contact me on Facebook</a>
@@ -654,7 +654,7 @@ function renderLanding() {
         </section>
       </main>
 
-      <footer class="footer"><span>© 2026 StorePOS Cloud · Built by Mark Reymuel Pascual</span><span><a href="#/manual">App Manual</a> · <a href="https://github.com/markyyy-lolz/StorePOS-Web" target="_blank" rel="noopener noreferrer">Resources</a> · <a href="https://facebook.com/profile.php?id=61590474910314" target="_blank" rel="noopener noreferrer">Facebook Contact</a> · Retail parts • Service • POS • Licensing</span></footer>
+      <footer class="footer"><span>© 2026 StorePOS Cloud · Built by Mark Reymuel Pascual</span><span><a href="#/manual">App Manual</a> · <a href="https://github.com/markyyy-lolz/StorePOS-Web" target="_blank" rel="noopener noreferrer">Resources</a> · <a href="https://facebook.com/profile.php?id=61590474910314" target="_blank" rel="noopener noreferrer">Facebook Contact</a> · Retail POS • Inventory • Operations • Licensing</span></footer>
     </div>`;
 
   setupMotion();
@@ -974,7 +974,7 @@ function renderShell(page) {
 
       <div class="main">
         <header class="topbar">
-          <div class="topbar-title"><strong>${esc(state.shop?.name || "StorePOS Cloud")}</strong><span>Cloud operations dashboard</span></div>
+          <div class="topbar-title"><strong>${esc(state.shop?.name || "StorePOS Cloud")}</strong><span>Retail operations command center</span></div>
           <div class="toolbar"><a class="btn btn-secondary btn-sm" href="#/manual">Manual</a><div class="user-pill"><div class="avatar">${esc((state.user?.email || "M").slice(0,1).toUpperCase())}</div><div class="user-copy"><strong style="font-size:12px">${esc(state.user?.email || "")}</strong><div class="help">${esc(role)}</div></div></div></div>
         </header>
         <main id="page-content" class="content"><div class="loading-block"></div></main>

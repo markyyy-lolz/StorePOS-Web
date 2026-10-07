@@ -40,3 +40,15 @@ GitHub Pages is deployed from the `web/` directory by GitHub Actions.
 - Matched the MotoPOS sidebar, top bar, cards, metrics, tables, forms, dialogs, animations and responsive behavior.
 - Kept StorePOS branding, retail copy, routes and retail-only modules intact.
 - Preserved StorePOS Turnstile verification styling and existing data workflows.
+
+
+## v1.5.0 — Retail Cloud Redesign
+- Rebuilt the StorePOS visual identity around a clean green-and-slate retail cloud design.
+- Added a new commercial public website with product, workflow, hardware, pricing and trial sections.
+- Reorganized Cloud navigation into Workspace, Products, Operations, Business and System groups.
+- Added a global StorePOS search surface for products, customers and receipt numbers.
+- Reworked Overview into a retail command center with KPI cards, 7-day sales visualization, attention center, quick actions and recent transactions.
+- Reworked Sales with dashboard metrics, search and status filtering.
+- Reworked Inventory with product search, category/status filters, margin visibility and cleaner product rows.
+- Updated authentication, dialogs, reports, portal/manual surfaces and responsive tablet/mobile styling to the new StorePOS design system.
+- Existing StorePOS Supabase workflows and retail modules remain intact.

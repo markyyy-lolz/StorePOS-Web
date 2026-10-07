@@ -321,7 +321,7 @@ function setupMotion(scope = document) {
   if (window.matchMedia?.("(prefers-reduced-motion: reduce)").matches) return;
 
   const items = scope.querySelectorAll?.(
-    ".section-head, .feature-card, .price-card, .manual-section, .manual-intro-card"
+    ".section-head, .feature-card, .price-card, .manual-section, .manual-intro-card, .retail-bento-card, .workflow-step, .hardware-item, .retail-hero-preview, .retail-cta"
   ) || [];
 
   const observer = new IntersectionObserver(entries => {
@@ -539,50 +539,81 @@ function renderManual() {
     </div>`;
 }
 
+
 function renderLanding() {
   app.innerHTML = `
-    <div class="public-shell">
-      <nav class="public-nav">
-        <a href="#/" class="brand"><span class="brand-logo">S</span><span>StorePOS</span></a>
+    <div class="public-shell retail-public">
+      <nav class="public-nav retail-public-nav">
+        <a href="#/" class="brand retail-brand">
+          <span class="brand-logo">S</span>
+          <span class="brand-copy"><strong>StorePOS</strong><small>Retail Cloud</small></span>
+        </a>
+        <div class="public-links">
+          <button class="public-link" type="button" data-scroll-target="features">Product</button>
+          <button class="public-link" type="button" data-scroll-target="workflow">How it works</button>
+          <button class="public-link" type="button" data-scroll-target="pricing">Pricing</button>
+          <a class="public-link" href="https://github.com/markyyy-lolz/StorePOS-Android/releases/latest" target="_blank" rel="noopener noreferrer">Download</a>
+        </div>
         <div class="nav-actions">
-          <a class="btn btn-secondary" href="https://github.com/markyyy-lolz/StorePOS-Web" target="_blank" rel="noopener noreferrer">Resources</a>
-          <a class="btn btn-secondary" href="#/manual">App Manual</a>
           <a class="btn btn-secondary" href="#/login">Sign in</a>
-          <a class="btn btn-primary" href="#/login?mode=signup">Start free setup</a>
+          <a class="btn btn-primary" href="#/login?mode=signup">Start free</a>
         </div>
       </nav>
 
       <main>
-        <section class="hero">
-          <div>
-            <span class="eyebrow">Retail shop operating system</span>
-            <h1>Run your retail business.<br><span class="gradient-text">One StorePOS Cloud.</span></h1>
-            <p>Manage checkout, inventory, customers, purchasing, staff, reports, receipts, devices and licensing from one cloud-connected system built for real retail operations.</p>
-            <div class="hero-actions">
-              <a class="btn btn-primary" href="#/login?mode=signup">Start 7-day Pro trial</a>
-              <a class="btn btn-secondary" href="#/login">Open dashboard</a>
-              <a class="btn btn-secondary" href="#/manual">Read the app manual</a>
-              <a class="btn btn-secondary" href="https://github.com/markyyy-lolz/StorePOS-Web" target="_blank" rel="noopener noreferrer">Open Resources</a>
+        <section class="retail-hero">
+          <div class="retail-hero-copy">
+            <span class="retail-eyebrow"><i></i> Built for modern retail</span>
+            <h1>The smarter way to <span>run your store.</span></h1>
+            <p>Checkout, inventory, purchasing, customers, staff, payments and reports — connected in one StorePOS system built for everyday retail operations.</p>
+            <div class="retail-hero-actions">
+              <a class="btn btn-primary btn-lg" href="#/login?mode=signup">Start 7-day Pro trial</a>
+              <a class="btn btn-secondary btn-lg" href="https://github.com/markyyy-lolz/StorePOS-Android/releases/latest" target="_blank" rel="noopener noreferrer">Download Android app</a>
             </div>
-            <div class="hero-trust">
-              <span><b>Supabase</b> secured data</span>
-              <span><b>Android</b> POS terminals</span>
-              <span><b>7-day</b> Pro trial included</span>
-              <span><b>GitHub</b> automated releases</span>
+            <div class="retail-proof">
+              <span><b>✓</b>No card required</span>
+              <span><b>✓</b>Cloud synchronized</span>
+              <span><b>✓</b>Android POS ready</span>
             </div>
           </div>
 
-          <div class="mock-window" aria-hidden="true">
-            <div class="mock-top"><i class="dot"></i><i class="dot"></i><i class="dot"></i></div>
-            <div class="mock-body">
-              <div class="mock-grid">
-                <div class="mock-card"><span>Sales today</span><strong>₱28,450</strong></div>
-                <div class="mock-card"><span>Active jobs</span><strong>8</strong></div>
-                <div class="mock-card wide">
-                  <span>Weekly performance</span>
-                  <div class="bars">
-                    <i style="height:32%"></i><i style="height:52%"></i><i style="height:43%"></i>
-                    <i style="height:76%"></i><i style="height:61%"></i><i style="height:88%"></i><i style="height:69%"></i>
+          <div class="retail-hero-preview" aria-label="StorePOS dashboard preview">
+            <div class="preview-shell">
+              <aside class="preview-sidebar">
+                <div class="preview-logo"><span>S</span><strong>StorePOS</strong></div>
+                <div class="preview-nav active"><i></i>Overview</div>
+                <div class="preview-nav"><i></i>Sales</div>
+                <div class="preview-nav"><i></i>Inventory</div>
+                <div class="preview-nav"><i></i>Customers</div>
+                <div class="preview-nav"><i></i>Suppliers</div>
+                <div class="preview-nav"><i></i>Reports</div>
+              </aside>
+              <div class="preview-main">
+                <div class="preview-top">
+                  <div><small>Paombong Branch</small><strong>Good evening, Store Owner</strong></div>
+                  <span class="preview-avatar">MR</span>
+                </div>
+                <div class="preview-content">
+                  <div class="preview-metrics">
+                    <div><small>Gross sales</small><strong>₱28,450</strong><em>+12.4%</em></div>
+                    <div><small>Transactions</small><strong>87</strong><em>+8 today</em></div>
+                    <div><small>Gross profit</small><strong>₱8,910</strong><em>31.3%</em></div>
+                    <div><small>Low stock</small><strong>12</strong><em class="warn">5 critical</em></div>
+                  </div>
+                  <div class="preview-grid">
+                    <div class="preview-chart">
+                      <div class="preview-card-title"><strong>Sales performance</strong><small>7 days</small></div>
+                      <div class="preview-bars">
+                        <i style="height:44%"></i><i style="height:58%"></i><i style="height:49%"></i>
+                        <i style="height:74%"></i><i style="height:64%"></i><i style="height:91%"></i><i style="height:78%"></i>
+                      </div>
+                    </div>
+                    <div class="preview-sales">
+                      <div class="preview-card-title"><strong>Recent sales</strong><small>Live</small></div>
+                      <div><span>#1928 · GCash</span><b>₱450</b></div>
+                      <div><span>#1927 · Cash</span><b>₱780</b></div>
+                      <div><span>#1926 · Maya</span><b>₱1,240</b></div>
+                    </div>
                   </div>
                 </div>
               </div>
@@ -590,73 +621,143 @@ function renderLanding() {
           </div>
         </section>
 
-        <section class="section">
-          <div class="section-head">
-            <div><span class="kicker">Built for operations</span><h2>Your complete retail operating system.</h2></div>
-            <p>Android handles the counter. StorePOS Cloud gives owners and managers one command center for sales, stock and day-to-day operations.</p>
+        <section class="retail-strip">
+          <div><strong>Fast checkout</strong><span>Barcode-ready sales</span></div>
+          <div><strong>Real-time stock</strong><span>Inventory that updates with sales</span></div>
+          <div><strong>Retail operations</strong><span>Purchasing, approvals and closing</span></div>
+          <div><strong>Cloud visibility</strong><span>Reports from anywhere you sign in</span></div>
+        </section>
+
+        <section class="retail-section" id="features">
+          <div class="retail-section-head">
+            <div>
+              <span class="section-kicker">Everything works together</span>
+              <h2>A retail command center, not just a sales screen.</h2>
+            </div>
+            <p>StorePOS connects the counter with your back office so owners, managers and staff work from the same operational data.</p>
           </div>
-          <div class="feature-grid">
-            ${[
-              ["POS","Fast product lookup, checkout and receipt workflows."],
-              ["Inventory","Stock levels, reorder alerts, cost and selling prices."],
-              ["Retail Control","Approvals, reconciliation and day-to-day store controls."],
-              ["Staff","Role-aware access for owners, managers and cashiers."],
-              ["Reports","Sales, expenses, transactions and operating summaries."],
-              ["Licensing","Plans, device limits, staff limits and remote suspension."]
-            ].map((f,i)=>`<article class="feature-card"><div class="feature-icon">${String(i+1).padStart(2,"0")}</div><h3>${f[0]}</h3><p>${f[1]}</p></article>`).join("")}
+          <div class="retail-bento">
+            <article class="retail-bento-card retail-bento-large">
+              <div class="bento-icon">01</div>
+              <span class="bento-label">Checkout</span>
+              <h3>Fast POS for the counter.</h3>
+              <p>Barcode scanning, multiple payment methods, digital receipts, discounts and manager-controlled actions.</p>
+              <div class="mini-checkout">
+                <div><span>3 items</span><strong>₱1,248.00</strong></div>
+                <button type="button">Charge</button>
+              </div>
+            </article>
+            <article class="retail-bento-card">
+              <div class="bento-icon">02</div>
+              <span class="bento-label">Inventory</span>
+              <h3>Know what is on the shelf.</h3>
+              <p>Stock levels, reorder points, categories, batches, serials and retail pricing in one catalog.</p>
+              <div class="stock-meter"><i style="width:72%"></i></div>
+              <small>72% healthy stock coverage</small>
+            </article>
+            <article class="retail-bento-card">
+              <div class="bento-icon">03</div>
+              <span class="bento-label">Purchasing</span>
+              <h3>Control replenishment.</h3>
+              <p>Suppliers, purchase orders, receiving, transfers and reorder suggestions designed for store operations.</p>
+            </article>
+            <article class="retail-bento-card">
+              <div class="bento-icon">04</div>
+              <span class="bento-label">Customers</span>
+              <h3>Build repeat business.</h3>
+              <p>Customer profiles, loyalty, store credit, receivables and secure digital receipt access.</p>
+            </article>
+            <article class="retail-bento-card retail-bento-wide">
+              <div>
+                <div class="bento-icon">05</div>
+                <span class="bento-label">Control & insights</span>
+                <h3>See the business, not just transactions.</h3>
+                <p>Sales reporting, cashier operations, approvals, reconciliation, branch visibility, staff and device management.</p>
+              </div>
+              <div class="insight-list">
+                <span><b>Gross margin</b><strong>31.3%</strong></span>
+                <span><b>Low stock</b><strong>12 items</strong></span>
+                <span><b>Active devices</b><strong>3 online</strong></span>
+              </div>
+            </article>
           </div>
         </section>
 
-        <section class="section">
-          <div class="section-head">
-            <div><span class="kicker">StorePOS plans</span><h2>Start small. Scale when needed.</h2></div>
-            <p>License plans are controlled from the secure StorePOS developer console.</p>
+        <section class="retail-section workflow-section" id="workflow">
+          <div class="retail-section-head centered">
+            <div><span class="section-kicker">One connected workflow</span><h2>From barcode scan to cloud report.</h2></div>
+            <p>Every sale can update the rest of your store operations automatically.</p>
           </div>
-          <div id="pricing-grid" class="pricing-grid">
+          <div class="workflow-track">
+            ${[
+              ["01","Scan","Find products by barcode, SKU or search."],
+              ["02","Checkout","Complete the sale using your accepted payment method."],
+              ["03","Update","Inventory and transaction records stay synchronized."],
+              ["04","Receipt","Issue a printed or digital receipt."],
+              ["05","Report","Owners see current store performance in StorePOS Cloud."]
+            ].map(x=>`<article class="workflow-step"><span>${x[0]}</span><strong>${x[1]}</strong><p>${x[2]}</p></article>`).join("")}
+          </div>
+        </section>
+
+        <section class="retail-section">
+          <div class="retail-section-head">
+            <div><span class="section-kicker">Hardware friendly</span><h2>Made for a real checkout counter.</h2></div>
+            <p>Use StorePOS with supported Android hardware and common retail peripherals. Compatibility depends on the specific device and protocol.</p>
+          </div>
+          <div class="hardware-grid">
+            ${[
+              ["Tablet","Android POS / tablet"],
+              ["Scanner","USB or Bluetooth barcode scanner"],
+              ["Printer","ESC/POS thermal receipt printer"],
+              ["Display","Secondary customer display"],
+              ["Drawer","Supported cash drawer pulse"],
+              ["Terminal","Dedicated StorePOS launcher"]
+            ].map(x=>`<article class="hardware-item"><div>${x[0].slice(0,1)}</div><strong>${x[0]}</strong><span>${x[1]}</span></article>`).join("")}
+          </div>
+        </section>
+
+        <section class="retail-section" id="pricing">
+          <div class="retail-section-head">
+            <div><span class="section-kicker">StorePOS plans</span><h2>Start small. Upgrade when the store grows.</h2></div>
+            <p>Plan limits and enabled modules are enforced by StorePOS Cloud. New shops start with a free Pro trial.</p>
+          </div>
+          <div id="pricing-grid" class="pricing-grid retail-pricing">
             <div class="loading-block"></div><div class="loading-block"></div><div class="loading-block"></div>
           </div>
         </section>
 
-        <section class="section">
-          <div class="section-head">
-            <div><span class="kicker">StorePOS resources</span><h2>Official shared files.</h2></div>
-            <p>Open the official StorePOS GitHub Resources folder for shared resources and files.</p>
-          </div>
-          <div class="founder-card reveal-motion is-visible">
-            <div class="founder-mark">G</div>
-            <div class="founder-copy">
-              <span class="kicker">GitHub Resources</span>
-              <h2>StorePOS Resources</h2>
-              <p>Use this official shared folder to access StorePOS files provided through GitHub Resources.</p>
-              <div class="founder-actions">
-                <a class="btn btn-primary" href="https://github.com/markyyy-lolz/StorePOS-Web" target="_blank" rel="noopener noreferrer">Open GitHub Resources Folder</a>
-                <a class="btn btn-secondary" href="#/manual">Read the StorePOS manual</a>
-                <a class="btn btn-secondary" href="https://github.com/markyyy-lolz/StorePOS-Web" target="_blank" rel="noopener noreferrer">StorePOS Resources</a>
-              </div>
+        <section class="retail-section">
+          <div class="retail-cta">
+            <div>
+              <span class="section-kicker">Ready for your counter?</span>
+              <h2>Move your store from manual tracking to StorePOS.</h2>
+              <p>Create your workspace, add your products and connect your Android terminal.</p>
             </div>
-          </div>
-        </section>
-
-        <section class="section founder-section">
-          <div class="founder-card reveal-motion is-visible">
-            <div class="founder-mark">MR</div>
-            <div class="founder-copy">
-              <span class="kicker">Meet the developer</span>
-              <h2>Hi, I’m Mark Reymuel Pascual.</h2>
-              <p>I’m the developer behind StorePOS, building practical digital tools for real workflows. StorePOS is focused on helping retail shops manage checkout, inventory, purchasing, staff access, customers, reporting, support and cloud operations in one connected system.</p>
-              <p class="founder-note">Have a question, suggestion, partnership idea, or need help with StorePOS? You can contact me directly on Facebook.</p>
-              <div class="founder-actions">
-                <a class="btn btn-primary" href="https://facebook.com/profile.php?id=61590474910314" target="_blank" rel="noopener noreferrer">Contact me on Facebook</a>
-                <a class="btn btn-secondary" href="#/manual">Read the StorePOS manual</a>
-              </div>
+            <div class="retail-cta-actions">
+              <a class="btn btn-primary btn-lg" href="#/login?mode=signup">Create StorePOS account</a>
+              <a class="btn btn-secondary btn-lg" href="#/manual">Read the manual</a>
             </div>
           </div>
         </section>
       </main>
 
-      <footer class="footer"><span>© 2026 StorePOS Cloud · Built by Mark Reymuel Pascual</span><span><a href="#/manual">App Manual</a> · <a href="https://github.com/markyyy-lolz/StorePOS-Web" target="_blank" rel="noopener noreferrer">Resources</a> · <a href="https://facebook.com/profile.php?id=61590474910314" target="_blank" rel="noopener noreferrer">Facebook Contact</a> · Retail POS • Inventory • Operations • Licensing</span></footer>
+      <footer class="retail-footer">
+        <div class="footer-brand">
+          <div class="brand"><span class="brand-logo">S</span><span class="brand-copy"><strong>StorePOS</strong><small>Retail Cloud</small></span></div>
+          <p>Cloud-connected retail operations for modern stores.</p>
+        </div>
+        <div class="footer-links">
+          <div><strong>Product</strong><a href="#/login">Cloud dashboard</a><a href="https://github.com/markyyy-lolz/StorePOS-Android/releases/latest" target="_blank" rel="noopener noreferrer">Android app</a></div>
+          <div><strong>Resources</strong><a href="#/manual">App manual</a><a href="https://github.com/markyyy-lolz/StorePOS-Web" target="_blank" rel="noopener noreferrer">GitHub</a></div>
+          <div><strong>Account</strong><a href="#/login">Sign in</a><a href="#/login?mode=signup">Start free</a></div>
+        </div>
+        <div class="footer-bottom"><span>© 2026 StorePOS · Built by Mark Reymuel Pascual</span><span>Retail POS · Inventory · Operations · Cloud</span></div>
+      </footer>
     </div>`;
 
+  document.querySelectorAll("[data-scroll-target]").forEach(button=>{
+    button.addEventListener("click",()=>document.getElementById(button.dataset.scrollTarget)?.scrollIntoView({behavior:"smooth",block:"start"}));
+  });
   setupMotion();
   loadPublicPlans();
 }
@@ -735,11 +836,11 @@ function renderAuth() {
   app.innerHTML = `
     <div class="auth-wrap">
       <section class="auth-art">
-        <a href="#/" class="brand"><span class="brand-logo">M</span><span>StorePOS Cloud</span></a>
+        <a href="#/" class="brand"><span class="brand-logo">S</span><span class="brand-copy"><strong>StorePOS</strong><small>Retail Cloud</small></span></a>
         <div>
-          <span class="eyebrow">Secure business access</span>
-          <h1>Run the shop.<br><span class="gradient-text">Not the paperwork.</span></h1>
-          <p>Sign in as an owner, manager or staff member. Permissions are enforced in the database—not just hidden in the interface.</p>
+          <span class="eyebrow">StorePOS Retail Cloud</span>
+          <h1>Run your store.<br><span class="gradient-text">Stay in control.</span></h1>
+          <p>Sales, stock, purchasing, customers and reports stay connected across your StorePOS workspace.</p>
         </div>
         <div class="help">Protected by Supabase Auth + Row Level Security.</div>
       </section>
@@ -949,40 +1050,70 @@ function renderSetup() {
   });
 }
 
+
 function renderShell(page) {
   const role = state.membership?.role || "staff";
   const roleAllowedPages = rolePages(role);
   const pages = planPagesForRole(role);
   if (!roleAllowedPages.includes(page)) page = "overview";
 
+  const groups = [
+    ["Workspace", ["overview","sales"]],
+    ["Products", ["inventory","retail"]],
+    ["Operations", ["control","operations","suppliers"]],
+    ["Business", ["customers","reports","branches","staff","devices"]],
+    ["System", ["support","license","settings"]]
+  ];
+  const groupMarkup = groups.map(([label,items])=>{
+    const visible=items.filter(item=>pages.includes(item));
+    if(!visible.length) return "";
+    return `<div class="nav-group"><span class="nav-group-label">${label}</span>${visible.map(p=>`<a class="nav-item ${p===page?"active":""}" href="#/dashboard/${p}"><span class="nav-dot"></span><span>${navLabel(p)}</span></a>`).join("")}</div>`;
+  }).join("");
+
   const adminLink = state.isSystemAdmin
-    ? `<a class="nav-item ${currentPath() === "admin" ? "active" : ""}" href="#/admin"><span>Developer Control</span><span class="nav-badge">ADMIN</span></a>`
+    ? `<div class="nav-group"><span class="nav-group-label">Developer</span><a class="nav-item ${currentPath()==="admin"?"active":""}" href="#/admin"><span class="nav-dot"></span><span>Developer Control</span><span class="nav-badge">ADMIN</span></a></div>`
     : "";
 
   app.innerHTML = `
-    <div class="app-shell">
-      <aside class="sidebar">
-        <div class="brand"><span class="brand-logo">S</span><span>StorePOS</span></div>
-        <div class="shop-chip"><strong>${esc(state.shop?.name || "StorePOS")}</strong><span>${esc(role)} · ${esc(state.entitlements?.plan_name || state.entitlements?.status || "No plan")}</span></div>
-        <nav class="nav-list">
-          ${pages.map(p => `<a class="nav-item ${p === page ? "active" : ""}" href="#/dashboard/${p}"><span>${navLabel(p)}</span></a>`).join("")}
-          <a class="nav-item" href="#/manual"><span>App Manual</span><span class="nav-badge">HELP</span></a>
-          ${adminLink}
-        </nav>
-        <div class="sidebar-bottom"><button id="sign-out" class="btn btn-secondary" style="width:100%">Sign out</button></div>
+    <div class="app-shell retail-app-shell">
+      <aside class="sidebar retail-sidebar">
+        <div class="sidebar-brand">
+          <a href="#/dashboard/overview" class="brand"><span class="brand-logo">S</span><span class="brand-copy"><strong>StorePOS</strong><small>Retail Cloud</small></span></a>
+        </div>
+        <div class="shop-chip retail-shop-chip">
+          <div class="shop-avatar">${esc((state.shop?.name||"S").slice(0,1).toUpperCase())}</div>
+          <div><strong>${esc(state.shop?.name || "StorePOS")}</strong><span>${esc(role)} · ${esc(state.entitlements?.plan_name || state.entitlements?.status || "No plan")}</span></div>
+        </div>
+        <nav class="nav-list retail-nav">${groupMarkup}${adminLink}</nav>
+        <div class="sidebar-bottom">
+          <a class="sidebar-help" href="#/manual"><span>?</span><div><strong>Help & manual</strong><small>StorePOS guides</small></div></a>
+          <button id="sign-out" class="sidebar-signout" type="button">Sign out</button>
+        </div>
       </aside>
 
       <div class="main">
-        <header class="topbar">
-          <div class="topbar-title"><strong>${esc(state.shop?.name || "StorePOS Cloud")}</strong><span>Cloud operations dashboard</span></div>
-          <div class="toolbar"><a class="btn btn-secondary btn-sm" href="#/manual">Manual</a><div class="user-pill"><div class="avatar">${esc((state.user?.email || "M").slice(0,1).toUpperCase())}</div><div class="user-copy"><strong style="font-size:12px">${esc(state.user?.email || "")}</strong><div class="help">${esc(role)}</div></div></div></div>
+        <header class="topbar retail-topbar">
+          <form id="global-search-form" class="global-search">
+            <span class="search-glyph">⌕</span>
+            <input id="global-search" type="search" autocomplete="off" placeholder="Search products, customers or receipts…" aria-label="Search StorePOS">
+            <kbd>Ctrl K</kbd>
+          </form>
+          <div class="topbar-actions">
+            <span class="workspace-chip">${esc(state.shop?.name || "StorePOS")}</span>
+            <button id="notification-shortcut" class="icon-button" type="button" title="Store attention">●</button>
+            <a class="icon-button" href="#/manual" title="Help">?</a>
+            <div class="user-pill">
+              <div class="avatar">${esc((state.user?.email || "M").slice(0,1).toUpperCase())}</div>
+              <div class="user-copy"><strong>${esc(state.user?.email || "")}</strong><div class="help">${esc(role)}</div></div>
+            </div>
+          </div>
         </header>
-        <main id="page-content" class="content"><div class="loading-block"></div></main>
+        <main id="page-content" class="content retail-content"><div class="loading-block"></div></main>
       </div>
 
-      <nav class="mobile-nav">
-        ${pages.slice(0,4).map(p => `<a class="${p === page ? "active" : ""}" href="#/dashboard/${p}">${navLabel(p)}</a>`).join("")}
-        ${state.isSystemAdmin ? `<a href="#/admin">Admin</a>` : pages.length > 4 ? `<a href="#/dashboard/license">More</a>` : ""}
+      <nav class="mobile-nav retail-mobile-nav">
+        ${["overview","sales","inventory"].filter(p=>pages.includes(p)).map(p=>`<a class="${p===page?"active":""}" href="#/dashboard/${p}">${navLabel(p)}</a>`).join("")}
+        <a href="#/dashboard/${pages.includes("settings")?"settings":"license"}">More</a>
       </nav>
     </div>`;
 
@@ -994,7 +1125,55 @@ function renderShell(page) {
     setHash("");
   });
 
+  document.querySelector("#global-search-form")?.addEventListener("submit",event=>{
+    event.preventDefault();
+    openGlobalSearch(document.querySelector("#global-search")?.value||"");
+  });
+  document.querySelector("#notification-shortcut")?.addEventListener("click",()=>setHash("dashboard/overview"));
+  if(!window.__storeposSearchShortcutBound){
+    window.__storeposSearchShortcutBound=true;
+    window.addEventListener("keydown",event=>{
+      if((event.ctrlKey||event.metaKey)&&event.key.toLowerCase()==="k"){
+        event.preventDefault();
+        document.querySelector("#global-search")?.focus();
+      }
+    });
+  }
   loadDashboardPage(page);
+}
+
+async function openGlobalSearch(rawQuery) {
+  const query=String(rawQuery||"").trim();
+  if(!query) return toast("Type something to search.","error");
+  const safe=query.replace(/[,%()]/g," ").trim() || query.replace(/[^a-z0-9@._ -]/gi," ").trim();
+  showModal(`<div class="search-modal-head"><span class="section-kicker">Global search</span><h2>Searching StorePOS…</h2><p>${esc(query)}</p></div><div class="loading-block"></div>`);
+  try{
+    const [productsRes,customersRes,salesRes]=await Promise.all([
+      supabase.from("products").select("id,name,sku,barcode,stock_quantity").eq("shop_id",state.shop.id).or(`name.ilike.%${safe}%,sku.ilike.%${safe}%,barcode.ilike.%${safe}%`).limit(8),
+      supabase.from("customers").select("id,name,phone,email").eq("shop_id",state.shop.id).or(`name.ilike.%${safe}%,phone.ilike.%${safe}%,email.ilike.%${safe}%`).limit(8),
+      supabase.from("sales").select("id,sale_number,total_amount,status,created_at").eq("shop_id",state.shop.id).ilike("sale_number",`%${safe}%`).order("created_at",{ascending:false}).limit(8)
+    ]);
+    const products=productsRes.data||[], customers=customersRes.data||[], sales=salesRes.data||[];
+    showModal(`
+      <div class="search-modal-head"><span class="section-kicker">Global search</span><h2>Results for “${esc(query)}”</h2><p>Search across the current StorePOS workspace.</p></div>
+      <div class="global-search-results">
+        <section><div class="result-heading"><strong>Products</strong><a href="#/dashboard/inventory" class="search-open-page">Open inventory</a></div>
+          ${products.map(x=>`<div class="search-result-row"><div><strong>${esc(x.name)}</strong><span>${esc(x.sku)} · ${esc(x.barcode||"No barcode")}</span></div><b>${number(x.stock_quantity)} in stock</b></div>`).join("")||'<div class="search-empty">No matching products.</div>'}
+        </section>
+        <section><div class="result-heading"><strong>Customers</strong><a href="#/dashboard/customers" class="search-open-page">Open customers</a></div>
+          ${customers.map(x=>`<div class="search-result-row"><div><strong>${esc(x.name)}</strong><span>${esc(x.phone||x.email||"No contact info")}</span></div></div>`).join("")||'<div class="search-empty">No matching customers.</div>'}
+        </section>
+        <section><div class="result-heading"><strong>Sales</strong><a href="#/dashboard/sales" class="search-open-page">Open sales</a></div>
+          ${sales.map(x=>`<div class="search-result-row"><div><strong>${esc(x.sale_number)}</strong><span>${niceDate(x.created_at,true)} · ${esc(x.status)}</span></div><b>${money(x.total_amount)}</b></div>`).join("")||'<div class="search-empty">No matching receipts.</div>'}
+        </section>
+      </div>
+      <div class="modal-actions"><button id="close-global-search" class="btn btn-secondary">Close</button></div>`);
+    document.querySelector("#close-global-search")?.addEventListener("click",closeModal);
+    document.querySelectorAll(".search-open-page").forEach(link=>link.addEventListener("click",closeModal));
+  }catch(error){
+    showModal(`<h2>Search unavailable</h2><p>${esc(friendlyError(error))}</p><div class="modal-actions"><button id="close-global-search" class="btn btn-secondary">Close</button></div>`);
+    document.querySelector("#close-global-search")?.addEventListener("click",closeModal);
+  }
 }
 
 async function loadDashboardPage(page) {
@@ -1036,98 +1215,184 @@ function retailContext() {
   return { supabase, state, money, number, esc, niceDate, pill, head, toast, showModal, closeModal, friendlyError };
 }
 
+
 async function pageOverview(root) {
   const shopId = state.shop.id;
   const canFinance = ["owner","admin","manager"].includes(state.membership.role);
   const features = entitlementFeatures();
-  const hasService = false;
   const hasOperations = features.includes("operations");
 
-  const [salesRes, productRes, jobRes, expenseRes, alertRes] = await Promise.all([
-    supabase.from("sales").select("id,total_amount,status,created_at,sale_number").eq("shop_id", shopId).order("created_at",{ascending:false}).limit(100),
-    supabase.from("products").select("id,name,sku,stock_quantity,reorder_level,selling_price").eq("shop_id",shopId).eq("is_active",true),
-    hasService
-      ? supabase.from("job_orders").select("id,job_number,status,complaint,created_at").eq("shop_id",shopId).order("created_at",{ascending:false}).limit(30)
-      : Promise.resolve({data:[],error:null}),
+  const [salesRes, productRes, expenseRes, alertRes] = await Promise.all([
+    supabase.from("sales").select("id,total_amount,status,created_at,sale_number").eq("shop_id", shopId).order("created_at",{ascending:false}).limit(250),
+    supabase.from("products").select("id,name,sku,stock_quantity,reorder_level,cost_price,selling_price").eq("shop_id",shopId).eq("is_active",true),
     canFinance && hasOperations
-      ? supabase.from("expenses").select("id,amount,expense_date").eq("shop_id",shopId).order("expense_date",{ascending:false}).limit(100)
+      ? supabase.from("expenses").select("id,amount,expense_date").eq("shop_id",shopId).order("expense_date",{ascending:false}).limit(150)
       : Promise.resolve({data:[],error:null}),
     supabase.rpc("get_shop_alerts",{p_shop_id:shopId})
   ]);
-  for (const r of [salesRes,productRes,jobRes,expenseRes,alertRes]) if (r?.error) throw r.error;
+  for (const r of [salesRes,productRes,expenseRes,alertRes]) if (r?.error) throw r.error;
 
   const sales = salesRes.data || [];
   const products = productRes.data || [];
-  const jobs = jobRes.data || [];
   const expenses = expenseRes.data || [];
   const alerts = alertRes.data || [];
-
   const now = new Date();
   const sameDay = value => {
     const d = new Date(value);
     return d.getFullYear()===now.getFullYear() && d.getMonth()===now.getMonth() && d.getDate()===now.getDate();
   };
-  const todaySales = sales.filter(s => s.status === "completed" && sameDay(s.created_at));
+  const completed=sales.filter(s=>s.status==="completed");
+  const todaySales = completed.filter(s=>sameDay(s.created_at));
   const todayRevenue = todaySales.reduce((sum,s)=>sum+Number(s.total_amount||0),0);
   const todayExpense = expenses.filter(e=>sameDay(e.expense_date)).reduce((sum,e)=>sum+Number(e.amount||0),0);
   const lowStock = products.filter(p=>Number(p.stock_quantity)<=Number(p.reorder_level));
-  const activeJobs = jobs.filter(j=>!["released","cancelled"].includes(j.status));
+  const outOfStock = products.filter(p=>Number(p.stock_quantity)<=0);
+  const inventoryValue = products.reduce((sum,p)=>sum+Number(p.stock_quantity||0)*Number(p.cost_price||0),0);
+  const greeting = now.getHours()<12 ? "Good morning" : now.getHours()<18 ? "Good afternoon" : "Good evening";
+  const firstName=(state.user?.user_metadata?.display_name||state.user?.email||"Store owner").split(/[ @]/)[0];
+  const dateLabel=new Intl.DateTimeFormat("en-PH",{weekday:"long",month:"long",day:"numeric",year:"numeric"}).format(now);
+
+  const days=Array.from({length:7},(_,index)=>{
+    const d=new Date(now); d.setHours(0,0,0,0); d.setDate(d.getDate()-(6-index)); return d;
+  });
+  const dayValues=days.map(day=>completed.filter(s=>{
+    const d=new Date(s.created_at);
+    return d.getFullYear()===day.getFullYear()&&d.getMonth()===day.getMonth()&&d.getDate()===day.getDate();
+  }).reduce((sum,s)=>sum+Number(s.total_amount||0),0));
+  const maxDay=Math.max(1,...dayValues);
 
   root.innerHTML = `
-    ${head("Overview","Live snapshot of your retail shop")}
-    ${alerts.length ? `
-      <section class="alert-center">
-        <div class="card-title"><h3>Needs attention</h3><span>${alerts.length} current alert(s)</span></div>
-        <div class="alert-grid">
-          ${alerts.slice(0,8).map(a=>`
-            <a class="alert-item ${esc(a.severity||"info")}" href="#/dashboard/${esc(a.action_page||"overview")}">
-              <div><strong>${esc(a.title)}</strong><span>${esc(a.message)}</span></div>
-              <small>${niceDate(a.created_at,true)}</small>
-            </a>`).join("")}
-        </div>
-      </section>` : ""}
-    <section class="metrics">
-      <article class="metric"><div class="metric-label">Sales today</div><div class="metric-value">${money(todayRevenue)}</div><div class="metric-sub">${todaySales.length} completed transaction(s)</div></article>
-      <article class="metric"><div class="metric-label">${hasService?"Active jobs":"Products"}</div><div class="metric-value">${number(hasService?activeJobs.length:products.length)}</div><div class="metric-sub">${hasService?"Workshop queue":"Active inventory items"}</div></article>
-      <article class="metric"><div class="metric-label">Low stock</div><div class="metric-value">${number(lowStock.length)}</div><div class="metric-sub">At or below reorder level</div></article>
-      <article class="metric"><div class="metric-label">${canFinance&&hasOperations ? "Net today" : "Plan"}</div><div class="metric-value">${canFinance&&hasOperations ? money(todayRevenue-todayExpense) : esc(state.entitlements?.plan_name||"StorePOS")}</div><div class="metric-sub">${canFinance&&hasOperations ? `Expenses ${money(todayExpense)}` : "Server-enforced entitlements"}</div></article>
+    <section class="dashboard-welcome">
+      <div>
+        <span class="section-kicker">${esc(dateLabel)}</span>
+        <h1>${esc(greeting)}, ${esc(firstName)}.</h1>
+        <p>Here’s what is happening with ${esc(state.shop?.name||"your store")} today.</p>
+      </div>
+      <div class="dashboard-header-actions">
+        <a class="btn btn-secondary" href="#/dashboard/reports">View reports</a>
+        <a class="btn btn-primary" href="#/dashboard/sales">Open sales</a>
+      </div>
     </section>
-    <section class="grid-2">
-      <div class="card">
-        <div class="card-title"><h3>Recent sales</h3><a href="#/dashboard/sales">View all</a></div>
-        <div class="stat-list">
-          ${sales.slice(0,6).map(s=>`<div class="stat-row"><span>${esc(s.sale_number || "Sale")} · ${niceDate(s.created_at,true)}</span><strong>${money(s.total_amount)}</strong></div>`).join("") || '<div class="empty"><strong>No sales yet</strong>Your completed transactions will appear here.</div>'}
+
+    <section class="metrics retail-metrics">
+      <article class="metric retail-metric"><div class="metric-icon green">₱</div><div><div class="metric-label">Gross sales today</div><div class="metric-value">${money(todayRevenue)}</div><div class="metric-sub">${todaySales.length} completed transaction(s)</div></div></article>
+      <article class="metric retail-metric"><div class="metric-icon blue">#</div><div><div class="metric-label">Transactions</div><div class="metric-value">${number(todaySales.length)}</div><div class="metric-sub">Today across allowed terminals</div></div></article>
+      <article class="metric retail-metric"><div class="metric-icon amber">!</div><div><div class="metric-label">Low stock</div><div class="metric-value">${number(lowStock.length)}</div><div class="metric-sub">${number(outOfStock.length)} currently out of stock</div></div></article>
+      <article class="metric retail-metric"><div class="metric-icon violet">▦</div><div><div class="metric-label">Inventory cost</div><div class="metric-value">${money(inventoryValue)}</div><div class="metric-sub">Current on-hand stock × cost</div></div></article>
+    </section>
+
+    <section class="dashboard-grid">
+      <div class="card dashboard-chart-card">
+        <div class="card-title"><div><h3>Sales performance</h3><span>Completed sales · last 7 days</span></div><a href="#/dashboard/reports">Full report</a></div>
+        <div class="sales-chart">
+          ${days.map((day,index)=>{
+            const value=dayValues[index];
+            const height=Math.max(5,Math.round((value/maxDay)*100));
+            return `<div class="sales-bar-wrap"><div class="sales-bar-value">${value?money(value):""}</div><div class="sales-bar-track"><i style="height:${height}%"></i></div><span>${new Intl.DateTimeFormat("en-PH",{weekday:"short"}).format(day)}</span></div>`;
+          }).join("")}
         </div>
       </div>
-      <div class="card">
-        <div class="card-title"><h3>${hasService?"Workshop queue":"Inventory attention"}</h3><a href="#/dashboard/${hasService?"service":"inventory"}">${hasService?"Open service":"Open inventory"}</a></div>
-        <div class="stat-list">
-          ${hasService
-            ? (activeJobs.slice(0,6).map(j=>`<div class="stat-row"><span>${esc(j.job_number || "Job")} · ${esc(j.complaint || "Service job")}</span><strong>${pill(j.status)}</strong></div>`).join("") || '<div class="empty"><strong>No active jobs</strong>New service jobs will appear here.</div>')
-            : (lowStock.slice(0,6).map(p=>`<div class="stat-row"><span>${esc(p.name)} · ${esc(p.sku)}</span><strong>${number(p.stock_quantity)}</strong></div>`).join("") || '<div class="empty"><strong>Stock looks good</strong>No products are below reorder level.</div>')}
+
+      <div class="card quick-actions-card">
+        <div class="card-title"><div><h3>Quick actions</h3><span>Common retail tasks</span></div></div>
+        <div class="quick-action-grid">
+          <a href="#/dashboard/inventory"><span>＋</span><div><strong>Add / manage products</strong><small>Inventory catalog</small></div></a>
+          <a href="#/dashboard/retail"><span>▦</span><div><strong>Retail Suite</strong><small>Pricing, labels and stock tools</small></div></a>
+          <a href="#/dashboard/suppliers"><span>↙</span><div><strong>Suppliers</strong><small>Purchasing and receiving</small></div></a>
+          <a href="#/dashboard/control"><span>✓</span><div><strong>Retail Control</strong><small>Approvals and reconciliation</small></div></a>
         </div>
       </div>
-    </section>`;
+    </section>
+
+    <section class="dashboard-grid lower">
+      <div class="card attention-card">
+        <div class="card-title"><div><h3>Needs attention</h3><span>Prioritized store issues</span></div><span class="attention-count">${number(alerts.length||lowStock.length)}</span></div>
+        <div class="attention-list">
+          ${alerts.length ? alerts.slice(0,6).map(a=>`
+            <a class="attention-row ${esc(a.severity||"info")}" href="#/dashboard/${esc(a.action_page||"overview")}">
+              <span class="attention-dot"></span>
+              <div><strong>${esc(a.title)}</strong><small>${esc(a.message)}</small></div>
+              <em>${niceDate(a.created_at,true)}</em>
+            </a>`).join("") : lowStock.slice(0,6).map(p=>`
+            <a class="attention-row warning" href="#/dashboard/inventory"><span class="attention-dot"></span><div><strong>${esc(p.name)}</strong><small>${number(p.stock_quantity)} on hand · reorder at ${number(p.reorder_level)}</small></div><em>Inventory</em></a>`).join("") || '<div class="retail-empty"><strong>Everything looks good.</strong><span>No current alerts need your attention.</span></div>'}
+        </div>
+      </div>
+
+      <div class="card recent-sales-card">
+        <div class="card-title"><div><h3>Recent sales</h3><span>Latest checkout activity</span></div><a href="#/dashboard/sales">View all</a></div>
+        <div class="recent-sales-list">
+          ${sales.slice(0,7).map(s=>`<div class="recent-sale-row"><div><strong>${esc(s.sale_number||"Sale")}</strong><span>${niceDate(s.created_at,true)}</span></div><div><b>${money(s.total_amount)}</b>${pill(s.status)}</div></div>`).join("") || '<div class="retail-empty"><strong>No sales yet.</strong><span>Completed transactions will appear here.</span></div>'}
+        </div>
+      </div>
+    </section>
+
+    ${canFinance&&hasOperations?`<div class="dashboard-finance-note">Today’s operating snapshot: <strong>${money(todayRevenue-todayExpense)}</strong> after ${money(todayExpense)} in recorded expenses.</div>`:""}
+  `;
 }
+
 
 async function pageSales(root) {
   const [salesRes, detailsRes] = await Promise.all([
     supabase.from("sales")
       .select("id,sale_number,total_amount,subtotal,discount_amount,tax_amount,status,created_at,completed_at")
-      .eq("shop_id",state.shop.id).order("created_at",{ascending:false}).limit(150),
+      .eq("shop_id",state.shop.id).order("created_at",{ascending:false}).limit(250),
     supabase.from("retail_sale_details")
       .select("sale_id,receipt_token")
-      .eq("shop_id",state.shop.id).order("created_at",{ascending:false}).limit(250)
+      .eq("shop_id",state.shop.id).order("created_at",{ascending:false}).limit(350)
   ]);
   if (salesRes.error) throw salesRes.error;
   if (detailsRes.error) throw detailsRes.error;
   const data=salesRes.data||[];
   const tokenBySale=new Map((detailsRes.data||[]).map(x=>[x.sale_id,x.receipt_token]));
+  const now=new Date();
+  const today=data.filter(s=>{
+    const d=new Date(s.created_at);
+    return d.getFullYear()===now.getFullYear()&&d.getMonth()===now.getMonth()&&d.getDate()===now.getDate();
+  });
+  const completedToday=today.filter(s=>s.status==="completed");
+  const revenueToday=completedToday.reduce((sum,s)=>sum+Number(s.total_amount||0),0);
+  const discountsToday=completedToday.reduce((sum,s)=>sum+Number(s.discount_amount||0),0);
+
   root.innerHTML = `
-    ${head("Sales","Recent POS transactions from all allowed terminals")}
-    <div class="table-wrap"><table><thead><tr><th>Sale</th><th>Date</th><th>Status</th><th>Subtotal</th><th>Discount</th><th>Total</th><th>Receipt</th></tr></thead><tbody>
-      ${data.map(s=>`<tr><td><strong>${esc(s.sale_number)}</strong></td><td>${niceDate(s.created_at,true)}</td><td>${pill(s.status)}</td><td>${money(s.subtotal)}</td><td>${money(s.discount_amount)}</td><td><strong>${money(s.total_amount)}</strong></td><td>${tokenBySale.get(s.id)?`<button class="btn btn-secondary btn-sm sales-reprint" data-id="${s.id}">Reprint</button>`:'<span class="help">Legacy receipt</span>'}</td></tr>`).join("") || '<tr><td colspan="7">No transactions yet.</td></tr>'}
+    ${head("Sales","Review StorePOS transactions, status and receipt activity",'<a class="btn btn-primary" href="#/dashboard/control">Retail Control</a>')}
+    <section class="metrics retail-metrics compact">
+      <article class="metric retail-metric"><div class="metric-icon green">₱</div><div><div class="metric-label">Sales today</div><div class="metric-value">${money(revenueToday)}</div><div class="metric-sub">Completed transactions</div></div></article>
+      <article class="metric retail-metric"><div class="metric-icon blue">#</div><div><div class="metric-label">Transactions today</div><div class="metric-value">${number(today.length)}</div><div class="metric-sub">All statuses</div></div></article>
+      <article class="metric retail-metric"><div class="metric-icon violet">%</div><div><div class="metric-label">Discounts today</div><div class="metric-value">${money(discountsToday)}</div><div class="metric-sub">Completed sales only</div></div></article>
+      <article class="metric retail-metric"><div class="metric-icon amber">◌</div><div><div class="metric-label">Loaded history</div><div class="metric-value">${number(data.length)}</div><div class="metric-sub">Latest transaction records</div></div></article>
+    </section>
+    <div class="data-toolbar">
+      <div class="table-search"><span>⌕</span><input id="sales-search" type="search" placeholder="Search receipt number…"></div>
+      <select id="sales-status-filter" class="toolbar-select">
+        <option value="">All statuses</option>
+        ${[...new Set(data.map(x=>x.status).filter(Boolean))].map(x=>`<option value="${esc(x)}">${esc(x.replaceAll("_"," "))}</option>`).join("")}
+      </select>
+      <span class="toolbar-count" id="sales-visible-count">${number(data.length)} records</span>
+    </div>
+    <div class="table-wrap retail-table-wrap"><table class="retail-table"><thead><tr><th>Receipt</th><th>Date & time</th><th>Status</th><th>Subtotal</th><th>Discount</th><th>Total</th><th>Receipt action</th></tr></thead><tbody id="sales-table-body">
+      ${data.map(s=>`<tr data-sale-row data-search="${esc(String(s.sale_number||"").toLowerCase())}" data-status="${esc(String(s.status||"").toLowerCase())}">
+        <td><strong>${esc(s.sale_number)}</strong><div class="help">StorePOS transaction</div></td>
+        <td>${niceDate(s.created_at,true)}</td>
+        <td>${pill(s.status)}</td>
+        <td>${money(s.subtotal)}</td>
+        <td>${money(s.discount_amount)}</td>
+        <td><strong>${money(s.total_amount)}</strong></td>
+        <td>${tokenBySale.get(s.id)?`<button class="btn btn-secondary btn-sm sales-reprint" data-id="${s.id}">Reprint</button>`:'<span class="help">Legacy receipt</span>'}</td>
+      </tr>`).join("") || '<tr><td colspan="7"><div class="retail-empty"><strong>No transactions yet.</strong><span>Sales will appear here after checkout.</span></div></td></tr>'}
     </tbody></table></div>`;
+
+  const filterRows=()=>{
+    const q=String(document.querySelector("#sales-search")?.value||"").trim().toLowerCase();
+    const status=String(document.querySelector("#sales-status-filter")?.value||"").toLowerCase();
+    let visible=0;
+    root.querySelectorAll("[data-sale-row]").forEach(row=>{
+      const show=(!q||row.dataset.search.includes(q))&&(!status||row.dataset.status===status);
+      row.hidden=!show;if(show)visible++;
+    });
+    const counter=document.querySelector("#sales-visible-count"); if(counter) counter.textContent=number(visible)+" records";
+  };
+  document.querySelector("#sales-search")?.addEventListener("input",filterRows);
+  document.querySelector("#sales-status-filter")?.addEventListener("change",filterRows);
 
   root.querySelectorAll(".sales-reprint").forEach(btn=>btn.addEventListener("click",async()=>{
     const sale=data.find(x=>x.id===btn.dataset.id);
@@ -1147,6 +1412,7 @@ async function pageSales(root) {
   }));
 }
 
+
 async function pageInventory(root) {
   const canManage = ["owner","admin","manager","inventory"].includes(state.membership.role);
   const [productRes, categoryRes] = await Promise.all([
@@ -1162,36 +1428,79 @@ async function pageInventory(root) {
 
   const products = productRes.data || [];
   const categories = categoryRes.data || [];
-  const lowCount = products.filter(p=>p.is_active && Number(p.stock_quantity)<=Number(p.reorder_level)).length;
-  const stockValue = products.filter(p=>p.is_active).reduce((sum,p)=>sum+(Number(p.stock_quantity||0)*Number(p.cost_price||0)),0);
+  const categoryMap=new Map(categories.map(x=>[x.id,x.name]));
+  const activeProducts=products.filter(p=>p.is_active);
+  const lowCount = activeProducts.filter(p=>Number(p.stock_quantity)<=Number(p.reorder_level)).length;
+  const outCount = activeProducts.filter(p=>Number(p.stock_quantity)<=0).length;
+  const stockValue = activeProducts.reduce((sum,p)=>sum+(Number(p.stock_quantity||0)*Number(p.cost_price||0)),0);
 
   root.innerHTML = `
     ${head(
       "Inventory",
-      "Add products, edit pricing, adjust stock and archive items",
-      canManage ? '<button id="add-product" class="btn btn-primary">Add product</button>' : ""
+      "Products, pricing, stock levels and retail availability",
+      canManage ? '<div class="actions"><button id="add-product" class="btn btn-primary">+ Add product</button></div>' : ""
     )}
-    <section class="metrics">
-      <article class="metric"><div class="metric-label">Products</div><div class="metric-value">${number(products.filter(p=>p.is_active).length)}</div><div class="metric-sub">Active catalog items</div></article>
-      <article class="metric"><div class="metric-label">Low stock</div><div class="metric-value">${number(lowCount)}</div><div class="metric-sub">Need replenishment</div></article>
-      <article class="metric"><div class="metric-label">Inventory cost</div><div class="metric-value">${money(stockValue)}</div><div class="metric-sub">Current stock × cost</div></article>
-      <article class="metric"><div class="metric-label">Archived</div><div class="metric-value">${number(products.filter(p=>!p.is_active).length)}</div><div class="metric-sub">Hidden from normal selling</div></article>
+    <section class="metrics retail-metrics compact">
+      <article class="metric retail-metric"><div class="metric-icon green">▦</div><div><div class="metric-label">Active products</div><div class="metric-value">${number(activeProducts.length)}</div><div class="metric-sub">Available catalog items</div></div></article>
+      <article class="metric retail-metric"><div class="metric-icon amber">!</div><div><div class="metric-label">Low stock</div><div class="metric-value">${number(lowCount)}</div><div class="metric-sub">At or below reorder level</div></div></article>
+      <article class="metric retail-metric"><div class="metric-icon red">×</div><div><div class="metric-label">Out of stock</div><div class="metric-value">${number(outCount)}</div><div class="metric-sub">Needs replenishment</div></div></article>
+      <article class="metric retail-metric"><div class="metric-icon blue">₱</div><div><div class="metric-label">Inventory cost</div><div class="metric-value">${money(stockValue)}</div><div class="metric-sub">Current stock × cost</div></div></article>
     </section>
-    <div class="table-wrap"><table><thead><tr><th>Product</th><th>SKU / Barcode</th><th>Stock</th><th>Cost</th><th>Selling</th><th>Status</th>${canManage?"<th>Manage</th>":""}</tr></thead><tbody>
-      ${products.map(p=>`<tr>
-        <td><strong>${esc(p.name)}</strong><div class="help">${esc(p.brand||p.part_number||p.item_type||"—")}</div></td>
-        <td>${esc(p.sku)}<div class="help">${esc(p.barcode||"No barcode")}</div></td>
-        <td><strong>${number(p.stock_quantity)} ${esc(p.unit||"pc")}</strong><div class="help">Reorder at ${number(p.reorder_level)}</div></td>
-        <td>${money(p.cost_price)}</td>
-        <td><strong>${money(p.selling_price)}</strong></td>
-        <td>${!p.is_active ? pill("inactive") : Number(p.stock_quantity)<=Number(p.reorder_level)?pill("low stock"):pill("active")}</td>
-        ${canManage?`<td><div class="inventory-actions">
-          <button class="btn btn-secondary btn-sm edit-product" data-id="${p.id}">Edit</button>
-          <button class="btn btn-secondary btn-sm adjust-stock" data-id="${p.id}">Stock</button>
-          <button class="btn ${p.is_active?"btn-danger":"btn-success"} btn-sm toggle-product" data-id="${p.id}" data-active="${p.is_active?"0":"1"}">${p.is_active?"Archive":"Restore"}</button>
-        </div></td>`:""}
-      </tr>`).join("") || `<tr><td colspan="${canManage?7:6}">No products yet.</td></tr>`}
+
+    <div class="data-toolbar inventory-toolbar">
+      <div class="table-search"><span>⌕</span><input id="inventory-search" type="search" placeholder="Search product, SKU or barcode…"></div>
+      <select id="inventory-category-filter" class="toolbar-select">
+        <option value="">All categories</option>
+        ${categories.filter(x=>x.is_active).map(x=>`<option value="${x.id}">${esc(x.name)}</option>`).join("")}
+      </select>
+      <select id="inventory-status-filter" class="toolbar-select">
+        <option value="">All status</option>
+        <option value="active">In stock</option>
+        <option value="low">Low stock</option>
+        <option value="out">Out of stock</option>
+        <option value="archived">Archived</option>
+      </select>
+      <span class="toolbar-count" id="inventory-visible-count">${number(products.length)} items</span>
+    </div>
+
+    <div class="table-wrap retail-table-wrap"><table class="retail-table"><thead><tr><th>Product</th><th>SKU / Barcode</th><th>Category</th><th>Stock</th><th>Cost</th><th>Selling price</th><th>Margin</th><th>Status</th>${canManage?"<th>Manage</th>":""}</tr></thead><tbody>
+      ${products.map(p=>{
+        const stock=Number(p.stock_quantity||0), reorder=Number(p.reorder_level||0);
+        const status=!p.is_active?"archived":stock<=0?"out":stock<=reorder?"low":"active";
+        const margin=Number(p.selling_price||0)>0?((Number(p.selling_price||0)-Number(p.cost_price||0))/Number(p.selling_price||0))*100:0;
+        const search=[p.name,p.sku,p.barcode,p.brand].filter(Boolean).join(" ").toLowerCase();
+        return `<tr data-product-row data-search="${esc(search)}" data-category="${esc(p.category_id||"")}" data-status="${status}">
+          <td><div class="product-cell"><div class="product-avatar">${esc((p.name||"P").slice(0,1).toUpperCase())}</div><div><strong>${esc(p.name)}</strong><span>${esc(p.brand||p.item_type||"Retail product")}</span></div></div></td>
+          <td><strong>${esc(p.sku)}</strong><div class="help">${esc(p.barcode||"No barcode")}</div></td>
+          <td>${esc(categoryMap.get(p.category_id)||"Uncategorized")}</td>
+          <td><strong>${number(stock)} ${esc(p.unit||"pc")}</strong><div class="help">Reorder ${number(reorder)}</div></td>
+          <td>${money(p.cost_price)}</td>
+          <td><strong>${money(p.selling_price)}</strong></td>
+          <td><strong>${margin.toFixed(1)}%</strong></td>
+          <td>${status==="archived"?pill("inactive"):status==="out"?pill("out of stock"):status==="low"?pill("low stock"):pill("active")}</td>
+          ${canManage?`<td><div class="inventory-actions">
+            <button class="btn btn-secondary btn-sm edit-product" data-id="${p.id}">Edit</button>
+            <button class="btn btn-secondary btn-sm adjust-stock" data-id="${p.id}">Stock</button>
+            <button class="btn ${p.is_active?"btn-danger":"btn-success"} btn-sm toggle-product" data-id="${p.id}" data-active="${p.is_active?"0":"1"}">${p.is_active?"Archive":"Restore"}</button>
+          </div></td>`:""}
+        </tr>`;
+      }).join("") || `<tr><td colspan="${canManage?9:8}"><div class="retail-empty"><strong>No products yet.</strong><span>Add your first item or use the Retail Suite CSV import.</span></div></td></tr>`}
     </tbody></table></div>`;
+
+  const applyFilters=()=>{
+    const q=String(document.querySelector("#inventory-search")?.value||"").trim().toLowerCase();
+    const category=String(document.querySelector("#inventory-category-filter")?.value||"");
+    const status=String(document.querySelector("#inventory-status-filter")?.value||"");
+    let visible=0;
+    root.querySelectorAll("[data-product-row]").forEach(row=>{
+      const show=(!q||row.dataset.search.includes(q))&&(!category||row.dataset.category===category)&&(!status||row.dataset.status===status);
+      row.hidden=!show;if(show)visible++;
+    });
+    const counter=document.querySelector("#inventory-visible-count"); if(counter) counter.textContent=number(visible)+" items";
+  };
+  document.querySelector("#inventory-search")?.addEventListener("input",applyFilters);
+  document.querySelector("#inventory-category-filter")?.addEventListener("change",applyFilters);
+  document.querySelector("#inventory-status-filter")?.addEventListener("change",applyFilters);
 
   document.querySelector("#add-product")?.addEventListener("click",()=>openProductModal(root,null,categories));
   root.querySelectorAll(".edit-product").forEach(btn=>{

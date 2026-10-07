@@ -1,7 +1,7 @@
 {
-  "version": "1.4.1",
+  "version": "1.5.0",
   "app_code": "storepos",
   "product": "StorePOS Cloud",
   "released_at": "2026-10-07",
-  "summary": "MotoPOS interface parity: StorePOS Cloud now uses the same dark visual system, navigation, cards, tables, forms, dialogs and responsive layout as MotoPOS while keeping StorePOS retail branding and modules."
+  "summary": "Retail Cloud redesign: StorePOS now has its own modern green retail identity, grouped navigation, global search, redesigned public website, operational dashboard, sales workspace and inventory management interface."
 }

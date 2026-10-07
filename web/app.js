@@ -280,6 +280,28 @@ function resetTurnstile() {
   }
 }
 
+function turnstileErrorMessage(code) {
+  const value=String(code||"unknown");
+  const prefix=value.slice(0,3);
+  if(value==="110100"||value==="110110") return "The StorePOS Turnstile site key is invalid or unavailable.";
+  if(value==="110200") return "This StorePOS hostname is not authorized in Cloudflare Turnstile.";
+  if(value==="110600"||value==="110620") return "The security check timed out. Check your device clock and retry.";
+  if(value==="200100") return "Cloudflare detected a clock or cached challenge problem. Check automatic date/time, then hard refresh.";
+  if(prefix==="300"||prefix==="600") return "Cloudflare could not complete the browser challenge. Retry, then try another network if it continues.";
+  return "Cloudflare Turnstile could not complete the security check.";
+}
+
+function showTurnstileError(code, detail = "") {
+  state.turnstileToken = null;
+  const target=document.querySelector("#turnstile-widget");
+  const codeText=String(code||"unknown");
+  if(target){
+    target.innerHTML = "<div class=\"turnstile-fallback\"><div class=\"turnstile-fallback-icon\">!</div><div class=\"turnstile-fallback-copy\"><strong>Security verification unavailable</strong><span>"+esc(turnstileErrorMessage(codeText))+"</span><small>Error code: <b>"+esc(codeText)+"</b>"+(detail?" · "+esc(detail):"")+"</small></div><button type=\"button\" id=\"retry-turnstile\" class=\"btn btn-secondary btn-sm\">Retry</button></div>";
+    document.querySelector("#retry-turnstile")?.addEventListener("click",()=>{ target.innerHTML=""; mountTurnstile(0); });
+  }
+  toast("Cloudflare verification failed ("+codeText+"). Use Retry or check the browser/network.","error");
+}
+
 function mountTurnstile(attempt = 0) {
   const target = document.querySelector("#turnstile-widget");
   if (!target) return;
@@ -289,22 +311,28 @@ function mountTurnstile(attempt = 0) {
     if (state.turnstileWidgetId !== null && window.turnstile?.remove) {
       try { window.turnstile.remove(state.turnstileWidgetId); } catch (_) {}
     }
+    target.innerHTML="";
     state.turnstileToken = null;
-    state.turnstileWidgetId = window.turnstile.render(target, {
-      sitekey: TURNSTILE_SITE_KEY,
-      theme: "dark",
-      action: state.authMode === "signup" ? "storepos_signup" : "storepos_signin",
-      callback: token => {
-        state.turnstileToken = token;
-      },
-      "expired-callback": () => {
-        state.turnstileToken = null;
-      },
-      "error-callback": () => {
-        state.turnstileToken = null;
-        toast("Cloudflare verification could not load. Refresh the page and try again.", "error");
-      }
-    });
+    try {
+      state.turnstileWidgetId = window.turnstile.render(target, {
+        sitekey: TURNSTILE_SITE_KEY,
+        theme: "light",
+        size: "flexible",
+        appearance: "always",
+        retry: "auto",
+        "retry-interval": 3000,
+        "refresh-expired": "auto",
+        "refresh-timeout": "auto",
+        action: state.authMode === "signup" ? "storepos_signup" : "storepos_signin",
+        callback: token => { state.turnstileToken = token; target.classList.add("turnstile-ok"); },
+        "expired-callback": () => { state.turnstileToken = null; },
+        "timeout-callback": () => { state.turnstileToken = null; showTurnstileError("110620","challenge timeout"); },
+        "unsupported-callback": () => { showTurnstileError("unsupported_browser","browser not supported"); },
+        "error-callback": errorCode => { showTurnstileError(errorCode||"unknown"); return true; }
+      });
+    } catch (error) {
+      showTurnstileError("render_error",error?.message||"unable to render widget");
+    }
     return;
   }
 
@@ -314,9 +342,8 @@ function mountTurnstile(attempt = 0) {
     return;
   }
 
-  target.innerHTML = '<div class="help turnstile-error">Cloudflare verification did not load. Refresh the page and try again.</div>';
+  showTurnstileError("script_load_failed","challenges.cloudflare.com did not load");
 }
-
 function setupMotion(scope = document) {
   if (window.matchMedia?.("(prefers-reduced-motion: reduce)").matches) return;
 

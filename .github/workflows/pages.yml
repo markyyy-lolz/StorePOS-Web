@@ -34,6 +34,7 @@ jobs:
           node --check web/app.js
           node --check web/retail.js
           node --check web/ops13.js
+          node --check web/category-manager.js
 
       - name: Configure Pages
         uses: actions/configure-pages@v5

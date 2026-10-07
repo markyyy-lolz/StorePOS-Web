@@ -3443,3 +3443,5 @@ init().catch(error => {
   console.error(error);
   app.innerHTML = `<div class="setup"><div class="setup-card"><h1>StorePOS Cloud</h1><p>${esc(friendlyError(error))}</p><button class="btn btn-primary" onclick="location.reload()">Reload</button></div></div>`;
 });
+
+// StorePOS v1.4.1 MotoPOS UI parity.

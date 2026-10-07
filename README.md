@@ -52,3 +52,13 @@ GitHub Pages is deployed from the `web/` directory by GitHub Actions.
 - Reworked Inventory with product search, category/status filters, margin visibility and cleaner product rows.
 - Updated authentication, dialogs, reports, portal/manual surfaces and responsive tablet/mobile styling to the new StorePOS design system.
 - Existing StorePOS Supabase workflows and retail modules remain intact.
+
+
+## v1.5.1 — Resources Hub
+- Added a dedicated public `#/resources` page.
+- Official StorePOS Android v1.6.1 APK and release notes are surfaced directly.
+- Official StorePOS Terminal Launcher v1.2.0 APK, release notes and checksum file are surfaced directly.
+- Added SHA-256 verification values and copy controls.
+- Added Device Owner / kiosk provisioning guidance with the official launcher component.
+- Added direct access to the StorePOS manual from the Resources hub.
+- Removed the StorePOS-Web repository as the primary public Resources destination; it remains available only as website source.

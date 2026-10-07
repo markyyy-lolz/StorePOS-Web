@@ -465,6 +465,177 @@ function renderEmailVerified() {
     </div>`;
 }
 
+
+function renderResources() {
+  const androidVersion = "1.6.1";
+  const launcherVersion = "1.2.0";
+  const androidApk = "https://github.com/markyyy-lolz/StorePOS-Android/releases/download/v1.6.1/StorePOS-v1.6.1.apk";
+  const launcherApk = "https://github.com/markyyy-lolz/StorePOS-Terminal-Launcher/releases/download/v1.2.0/StorePOS-Terminal-Launcher-v1.2.0.apk";
+  const androidRelease = "https://github.com/markyyy-lolz/StorePOS-Android/releases/tag/v1.6.1";
+  const launcherRelease = "https://github.com/markyyy-lolz/StorePOS-Terminal-Launcher/releases/tag/v1.2.0";
+  const launcherShaFile = "https://github.com/markyyy-lolz/StorePOS-Terminal-Launcher/releases/download/v1.2.0/StorePOS-Terminal-Launcher-v1.2.0.apk.sha256";
+  const androidSha = "bfe01bd4bbc3f7ad3d54036239a74ab206aa94429318a1f810bef161527399f9";
+  const launcherSha = "5801a75d5decfc35a89c342b8e7c00ff14197d46e374acbefa47b2cfe66b576f";
+  const deviceOwnerCommand = "adb shell dpm set-device-owner com.storepos.launcher/.admin.StorePosDeviceAdminReceiver";
+
+  app.innerHTML = `
+    <div class="public-shell retail-public resources-page">
+      <nav class="public-nav retail-public-nav">
+        <a href="#/" class="brand retail-brand">
+          <span class="brand-logo">S</span>
+          <span class="brand-copy"><strong>StorePOS</strong><small>Retail Cloud</small></span>
+        </a>
+        <div class="public-links">
+          <a class="public-link" href="#/">Product</a>
+          <a class="public-link active" href="#/resources">Resources</a>
+          <a class="public-link" href="#/manual">Manual</a>
+        </div>
+        <div class="nav-actions">
+          <a class="btn btn-secondary" href="#/login">Sign in</a>
+          <a class="btn btn-primary" href="#/login?mode=signup">Start free</a>
+        </div>
+      </nav>
+
+      <main>
+        <section class="resources-hero">
+          <div>
+            <span class="retail-eyebrow"><i></i> Official StorePOS resources</span>
+            <h1>Downloads, setup tools and guides in one place.</h1>
+            <p>Use this page for official StorePOS Android releases, the dedicated terminal launcher, installation guidance and documentation. The StorePOS-Web source repository is no longer used as the main Resources destination.</p>
+          </div>
+          <div class="resources-release-status">
+            <span class="status-dot"></span>
+            <div><strong>Production resources</strong><small>Current stable StorePOS packages</small></div>
+          </div>
+        </section>
+
+        <section class="resources-section">
+          <div class="resources-grid">
+            <article class="resource-card resource-card-primary">
+              <div class="resource-card-top">
+                <div class="resource-icon android">A</div>
+                <div><span class="resource-type">Android POS</span><h2>StorePOS Android</h2></div>
+                <span class="resource-version">v${androidVersion}</span>
+              </div>
+              <p>The main StorePOS cashier application for Android tablets and compatible Android POS terminals.</p>
+              <div class="resource-meta">
+                <span><b>Android</b> 8.0+</span>
+                <span><b>Package</b> com.storepos.app</span>
+                <span><b>Version code</b> 20</span>
+              </div>
+              <div class="resource-actions">
+                <a class="btn btn-primary" href="${androidApk}">Download APK</a>
+                <a class="btn btn-secondary" href="${androidRelease}" target="_blank" rel="noopener noreferrer">Release notes</a>
+              </div>
+              <div class="checksum-box">
+                <div><strong>SHA-256</strong><span>Verify the downloaded APK if needed.</span></div>
+                <code>${androidSha}</code>
+                <button class="copy-resource" type="button" data-copy="${androidSha}">Copy</button>
+              </div>
+            </article>
+
+            <article class="resource-card">
+              <div class="resource-card-top">
+                <div class="resource-icon launcher">L</div>
+                <div><span class="resource-type">Dedicated terminal</span><h2>StorePOS Terminal Launcher</h2></div>
+                <span class="resource-version">v${launcherVersion}</span>
+              </div>
+              <p>Optional StorePOS home launcher for dedicated cashier tablets, kiosk deployments and managed StorePOS terminals.</p>
+              <div class="resource-meta">
+                <span><b>Android</b> 8.0+</span>
+                <span><b>Package</b> com.storepos.launcher</span>
+                <span><b>Version code</b> 3</span>
+              </div>
+              <div class="resource-actions">
+                <a class="btn btn-primary" href="${launcherApk}">Download Launcher</a>
+                <a class="btn btn-secondary" href="${launcherRelease}" target="_blank" rel="noopener noreferrer">Release notes</a>
+                <a class="btn btn-secondary" href="${launcherShaFile}">Checksum file</a>
+              </div>
+              <div class="checksum-box">
+                <div><strong>SHA-256</strong><span>Stable launcher release checksum.</span></div>
+                <code>${launcherSha}</code>
+                <button class="copy-resource" type="button" data-copy="${launcherSha}">Copy</button>
+              </div>
+            </article>
+
+            <article class="resource-card resource-guide-card">
+              <div class="resource-card-top">
+                <div class="resource-icon guide">?</div>
+                <div><span class="resource-type">Documentation</span><h2>StorePOS Manual</h2></div>
+              </div>
+              <p>Setup, inventory, checkout, receipt printing, barcode scanning, branches, devices and everyday retail workflow guidance.</p>
+              <div class="resource-feature-list">
+                <span>Account and workspace setup</span>
+                <span>Bluetooth / USB ESC-POS guidance</span>
+                <span>Retail operations and closing checklist</span>
+                <span>Licensing and device guidance</span>
+              </div>
+              <div class="resource-actions">
+                <a class="btn btn-primary" href="#/manual">Open StorePOS Manual</a>
+              </div>
+            </article>
+
+            <article class="resource-card resource-guide-card">
+              <div class="resource-card-top">
+                <div class="resource-icon kiosk">K</div>
+                <div><span class="resource-type">Tablet deployment</span><h2>Kiosk / Device Owner Setup</h2></div>
+              </div>
+              <p>For a dedicated Android checkout terminal, the StorePOS Launcher can be provisioned as Device Owner for stronger kiosk controls.</p>
+              <div class="resource-warning">
+                Device Owner provisioning normally requires a freshly reset / unprovisioned Android device. It does not bypass Android security.
+              </div>
+              <div class="resource-command">
+                <code>${deviceOwnerCommand}</code>
+                <button class="copy-resource" type="button" data-copy="${deviceOwnerCommand}">Copy command</button>
+              </div>
+              <div class="resource-actions">
+                <a class="btn btn-secondary" href="${launcherRelease}" target="_blank" rel="noopener noreferrer">Launcher setup notes</a>
+              </div>
+            </article>
+          </div>
+        </section>
+
+        <section class="resources-section resources-support-strip">
+          <div>
+            <span class="section-kicker">Need help?</span>
+            <h2>Install the app first, then configure the terminal around your store.</h2>
+            <p>For printer setup, account access, licensing or StorePOS configuration, use the manual or sign in to StorePOS Support.</p>
+          </div>
+          <div class="resource-actions">
+            <a class="btn btn-primary" href="#/manual">Read manual</a>
+            <a class="btn btn-secondary" href="#/login">Open StorePOS Cloud</a>
+          </div>
+        </section>
+      </main>
+
+      <footer class="retail-footer compact-footer">
+        <div class="footer-brand">
+          <div class="brand"><span class="brand-logo">S</span><span class="brand-copy"><strong>StorePOS</strong><small>Retail Cloud</small></span></div>
+          <p>Official StorePOS downloads and deployment resources.</p>
+        </div>
+        <div class="footer-links">
+          <div><strong>Downloads</strong><a href="${androidApk}">StorePOS Android</a><a href="${launcherApk}">Terminal Launcher</a></div>
+          <div><strong>Guides</strong><a href="#/manual">App manual</a><a href="#/resources">Resources</a></div>
+          <div><strong>Developer</strong><a href="https://github.com/markyyy-lolz/StorePOS-Web" target="_blank" rel="noopener noreferrer">Website source</a></div>
+        </div>
+        <div class="footer-bottom"><span>© 2026 StorePOS · Built by Mark Reymuel Pascual</span><span>Official resources · Verified release links</span></div>
+      </footer>
+    </div>`;
+
+  document.querySelectorAll(".copy-resource").forEach(button=>{
+    button.addEventListener("click",async()=>{
+      try{
+        await navigator.clipboard.writeText(button.dataset.copy||"");
+        const original=button.textContent;
+        button.textContent="Copied";
+        setTimeout(()=>button.textContent=original,1400);
+      }catch(_){
+        toast("Unable to copy automatically. Select the text manually.","error");
+      }
+    });
+  });
+}
+
 function renderManual() {
   const sections = [
     ["01","Getting Started","Create your StorePOS account, verify your email, create a retail workspace, and begin the 7-day StorePOS Pro Trial."],
@@ -488,6 +659,7 @@ function renderManual() {
       <nav class="public-nav">
         <a href="#/" class="brand"><span class="brand-logo">S</span><span>StorePOS</span></a>
         <div class="nav-actions">
+          <a class="btn btn-secondary" href="#/resources">Resources</a>
           <a class="btn btn-secondary" href="#/">Website</a>
           ${state.session && state.shop ? '<a class="btn btn-primary" href="#/dashboard/overview">Dashboard</a>' : '<a class="btn btn-primary" href="#/login">Sign in</a>'}
         </div>
@@ -552,6 +724,7 @@ function renderLanding() {
           <button class="public-link" type="button" data-scroll-target="features">Product</button>
           <button class="public-link" type="button" data-scroll-target="workflow">How it works</button>
           <button class="public-link" type="button" data-scroll-target="pricing">Pricing</button>
+          <a class="public-link" href="#/resources">Resources</a>
           <a class="public-link" href="https://github.com/markyyy-lolz/StorePOS-Android/releases/latest" target="_blank" rel="noopener noreferrer">Download</a>
         </div>
         <div class="nav-actions">
@@ -748,7 +921,7 @@ function renderLanding() {
         </div>
         <div class="footer-links">
           <div><strong>Product</strong><a href="#/login">Cloud dashboard</a><a href="https://github.com/markyyy-lolz/StorePOS-Android/releases/latest" target="_blank" rel="noopener noreferrer">Android app</a></div>
-          <div><strong>Resources</strong><a href="#/manual">App manual</a><a href="https://github.com/markyyy-lolz/StorePOS-Web" target="_blank" rel="noopener noreferrer">GitHub</a></div>
+          <div><strong>Resources</strong><a href="#/resources">Downloads & setup</a><a href="#/manual">App manual</a></div>
           <div><strong>Account</strong><a href="#/login">Sign in</a><a href="#/login?mode=signup">Start free</a></div>
         </div>
         <div class="footer-bottom"><span>© 2026 StorePOS · Built by Mark Reymuel Pascual</span><span>Retail POS · Inventory · Operations · Cloud</span></div>
@@ -3693,6 +3866,11 @@ async function route() {
 
   if (path === "confirm-email" || path.startsWith("confirm-email?")) {
     renderEmailConfirmationGate();
+    return;
+  }
+
+  if (path === "resources") {
+    renderResources();
     return;
   }
 

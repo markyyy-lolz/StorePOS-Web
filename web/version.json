@@ -1,7 +1,7 @@
 {
-  "version": "1.5.0",
+  "version": "1.5.1",
   "app_code": "storepos",
   "product": "StorePOS Cloud",
   "released_at": "2026-10-07",
-  "summary": "Retail Cloud redesign: StorePOS now has its own modern green retail identity, grouped navigation, global search, redesigned public website, operational dashboard, sales workspace and inventory management interface."
+  "summary": "Adds a dedicated StorePOS Resources hub for official Android APKs, Terminal Launcher, checksums, manual access and kiosk provisioning guidance. StorePOS-Web is no longer used as the primary Resources destination."
 }

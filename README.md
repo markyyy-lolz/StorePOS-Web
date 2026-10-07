@@ -33,3 +33,10 @@ GitHub Pages is deployed from the `web/` directory by GitHub Actions.
 - Refined dashboard cards, tables, forms, modals, alerts, support, manual and customer-portal surfaces.
 - Improved retail product messaging and removed workshop-oriented positioning from the StorePOS landing page.
 - Improved responsive layouts for tablet and mobile browsers without changing existing StorePOS data workflows.
+
+
+## v1.4.1 — MotoPOS Interface Parity
+- Restored the same dark visual system used by MotoPOS Cloud.
+- Matched the MotoPOS sidebar, top bar, cards, metrics, tables, forms, dialogs, animations and responsive behavior.
+- Kept StorePOS branding, retail copy, routes and retail-only modules intact.
+- Preserved StorePOS Turnstile verification styling and existing data workflows.

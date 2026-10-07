@@ -62,3 +62,12 @@ GitHub Pages is deployed from the `web/` directory by GitHub Actions.
 - Added Device Owner / kiosk provisioning guidance with the official launcher component.
 - Added direct access to the StorePOS manual from the Resources hub.
 - Removed the StorePOS-Web repository as the primary public Resources destination; it remains available only as website source.
+
+
+## v1.5.2 — Turnstile Recovery
+- Switched the StorePOS web Turnstile widget to the light, flexible presentation used by the redesigned login card.
+- Enabled automatic Turnstile retry with a shorter recovery interval.
+- Enabled automatic refresh for expired and timed-out challenges.
+- Added exact Cloudflare Turnstile error-code display instead of the previous generic failure toast.
+- Added an in-page Retry action and specific messages for invalid site key, unauthorized hostname, timeout, clock/cache issues and browser challenge failures.
+- Added unsupported-browser and script-load diagnostics.

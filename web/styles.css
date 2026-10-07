@@ -1080,3 +1080,25 @@ body .category-empty{border-color:#dce3df!important}
   .checksum-box{grid-template-columns:1fr}.checksum-box .copy-resource{justify-self:start}
   .resource-command{grid-template-columns:1fr}.resource-command .copy-resource{justify-self:start}
 }
+
+
+/* Turnstile recovery v1.5.2 */
+#turnstile-widget{width:100%;min-height:70px}
+.turnstile-wrap{background:#f8faf9!important;border-color:#e1e7e3!important}
+.turnstile-fallback{
+  min-height:78px;display:grid;grid-template-columns:auto minmax(0,1fr) auto;gap:11px;align-items:center;
+  padding:12px;border:1px solid #fecaca;border-radius:11px;background:#fff7f7
+}
+.turnstile-fallback-icon{
+  width:34px;height:34px;border-radius:50%;display:grid;place-items:center;
+  background:#fee2e2;color:#b91c1c;font-size:16px;font-weight:900
+}
+.turnstile-fallback-copy{display:flex;flex-direction:column;gap:2px;min-width:0}
+.turnstile-fallback-copy strong{font-size:10px;color:#7f1d1d}
+.turnstile-fallback-copy span{font-size:9px;color:#991b1b;line-height:1.45}
+.turnstile-fallback-copy small{font-size:8px;color:#b45309}
+.turnstile-fallback .btn{min-height:32px}
+@media(max-width:520px){
+  .turnstile-fallback{grid-template-columns:auto minmax(0,1fr)}
+  .turnstile-fallback .btn{grid-column:1/-1;justify-self:start}
+}

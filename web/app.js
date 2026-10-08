@@ -1237,7 +1237,7 @@ function renderRequiredPasswordChange() {
     button.disabled=true;
     button.textContent="Updating password…";
 
-    const {data,error}=await supabase.functions.invoke("invite-staff",{
+    const {data,error}=await supabase.functions.invoke("storepos-invite-staff",{
       body:{action:"change_password",new_password:password}
     });
     if(error||data?.error){

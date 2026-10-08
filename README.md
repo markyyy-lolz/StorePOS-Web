@@ -118,3 +118,11 @@ GitHub Pages is deployed from the `web/` directory by GitHub Actions.
 - Required password changes are only accepted for newly provisioned StorePOS staff whose server-controlled app metadata requires a password change.
 - Owner/admin, StorePOS-only shop checks, active license and staff-capacity checks remain server-side.
 - Android staff role/status controls must call the same StorePOS Edge Function; see the companion Android repository update.
+
+## v1.5.8 — Supabase Auth Session Isolation
+- Fixed misleading non-2xx errors from admin-users and PayMongo Admin when an Auth session was revoked.
+- Cloud now validates the JWT against Supabase Auth before protected Edge requests and displays a clear sign-in message for expired sessions.
+- Added a StorePOS-only Supabase Auth localStorage key to prevent MotoPOS and StorePOS replacing each other's tokens on the shared GitHub Pages origin.
+- Changed StorePOS sign-out to local scope (previously Supabase defaulted to global revocation).
+- Preserved StorePOS licenses, staff permissions, PayMongo entitlements and existing production records.
+- One-time StorePOS Cloud re-login is required after the new session-storage key is deployed.

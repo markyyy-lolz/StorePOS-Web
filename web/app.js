@@ -1943,7 +1943,7 @@ async function pageStaff(root) {
 function openStaffModal(root) {
   showModal(`
     <h2>Create staff account</h2>
-    <p>The staff member can immediately sign in to the StorePOS Android app using the email and temporary password you set here.</p>
+    <p>Create a StorePOS staff account with a temporary password. The new user can sign in immediately to StorePOS Android and StorePOS Cloud according to the assigned role.</p>
     <form id="staff-form" class="form">
       <div class="field"><label>Full name</label><input class="input" name="display_name" required placeholder="Juan Dela Cruz"></div>
       <div class="field"><label>Email address</label><input class="input" type="email" name="email" required placeholder="cashier@example.com"></div>
@@ -1952,13 +1952,12 @@ function openStaffModal(root) {
         <label>Role</label>
         <select class="input" name="role">
           <option value="cashier">Cashier</option>
-          <option value="mechanic">Mechanic</option>
           <option value="inventory">Inventory Staff</option>
           <option value="manager">Manager</option>
           <option value="admin">Shop Admin</option>
         </select>
       </div>
-      <div class="help">The shop's StorePOS license controls the maximum number of active staff accounts.</div>
+      <div class="help">The current StorePOS plan controls staff access and the maximum number of active accounts. StorePOS Basic does not include Staff Management.</div>
       <div class="modal-actions">
         <button type="button" id="close-staff" class="btn btn-secondary">Cancel</button>
         <button type="submit" class="btn btn-primary">Create staff</button>

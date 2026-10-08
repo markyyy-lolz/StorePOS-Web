@@ -1,7 +1,7 @@
 {
-  "version": "1.5.3",
+  "version": "1.5.4",
   "app_code": "storepos",
   "product": "StorePOS Cloud",
   "released_at": "2026-10-08",
-  "summary": "Staff Management v2: StorePOS-native account creation, existing-account linking, first-login password change, staff role management, deactivate/reactivate controls, license-limit enforcement and audited server-side administration."
+  "summary": "Updates the official StorePOS Resources hub to Android v1.6.2 Staff First-Login Security, including the direct APK, release notes, version code and SHA-256 checksum."
 }

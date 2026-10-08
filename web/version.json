@@ -1,7 +1,7 @@
 {
-  "version": "1.5.4",
+  "version": "1.5.5",
   "app_code": "storepos",
   "product": "StorePOS Cloud",
   "released_at": "2026-10-08",
-  "summary": "Updates the official StorePOS Resources hub to Android v1.6.2 Staff First-Login Security, including the direct APK, release notes, version code and SHA-256 checksum."
+  "summary": "Synchronizes the StorePOS Resources hub with the final published v1.6.2 APK SHA-256 after release artifact publication."
 }

@@ -1,7 +1,7 @@
 {
-  "version": "1.5.7",
+  "version": "1.5.8",
   "app_code": "storepos",
   "product": "StorePOS Cloud",
   "released_at": "2026-10-08",
-  "summary": "Staff Management v2: production grants restored, isolated required-password workflow, and secure staff administration."
+  "summary": "Fix 401 Edge Function errors: StorePOS-specific browser sessions, local sign-out, session validation and readable backend errors."
 }

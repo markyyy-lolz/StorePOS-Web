@@ -2079,7 +2079,7 @@ function openStaffModal(root) {
           <option value="manager">Manager</option>
         </select>
       </div>
-      <div class="verify-note"><strong>Existing email?</strong><span>If that email already has a Supabase account, StorePOS links it safely to this shop and keeps the existing password.</span></div>
+      <div class="verify-note"><strong>Existing email?</strong><span>If this email already has an account in another shop, request a separate invitation. StorePOS will not change its password or grant access automatically.</span></div>
       <div class="help">Staff Management requires a StorePOS plan with the Staff feature. Server-side checks enforce the shop, role and active-account limit.</div>
       <div class="modal-actions">
         <button type="button" id="close-staff" class="btn btn-secondary">Cancel</button>
@@ -2092,7 +2092,7 @@ function openStaffModal(root) {
 }
 
 async function invokeStaffAdmin(body) {
-  const {data,error}=await supabase.functions.invoke("invite-staff",{body});
+  const {data,error}=await supabase.functions.invoke("storepos-invite-staff",{body});
   if(error||data?.error){
     const details=error?await functionErrorDetails(error):null;
     const message=data?.error||details?.error||details?.message||details?.msg||error;

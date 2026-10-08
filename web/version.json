@@ -1,7 +1,7 @@
 {
-  "version": "1.5.6",
+  "version": "1.5.7",
   "app_code": "storepos",
   "product": "StorePOS Cloud",
   "released_at": "2026-10-08",
-  "summary": "Staff Management diagnostics: server-side PostgREST error handling, safe failure codes and reference IDs, plus inline staff creation errors."
+  "summary": "Staff Management v2: production grants restored, isolated required-password workflow, and secure staff administration."
 }

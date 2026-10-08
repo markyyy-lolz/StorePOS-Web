@@ -192,6 +192,19 @@ Deno.serve(async (req: Request) => {
     const action = String(body.action || "create").trim().toLowerCase();
 
     if (action === "change_password") {
+      // Supabase Auth is shared with MotoPOS. Never update a MotoPOS or
+      // unrelated account through the StorePOS temporary-password workflow.
+      // app_metadata is server-managed and cannot be edited by the caller.
+      const staffMetadata = user.app_metadata || {};
+      if (staffMetadata.app_code !== "storepos" ||
+          staffMetadata.storepos_staff !== true ||
+          staffMetadata.must_change_password !== true) {
+        return json({
+          error: "This password-change flow is only for newly invited StorePOS staff.",
+          code: "storepos_password_change_not_allowed",
+        }, 403);
+      }
+
       const newPassword = String(body.new_password || "");
       if (newPassword.length < 8) {
         return json({ error: "Your new password must be at least 8 characters.", code: "password_too_short" }, 400);

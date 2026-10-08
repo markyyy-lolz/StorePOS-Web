@@ -101,3 +101,7 @@ GitHub Pages is deployed from the `web/` directory by GitHub Actions.
 - Updated direct APK and release-note links.
 - Updated Android version code to 21.
 - Updated the displayed SHA-256 checksum for the v1.6.2 APK.
+
+
+## v1.5.5 — Final v1.6.2 Checksum
+- Synced the Resources hub to the final published StorePOS Android v1.6.2 APK SHA-256.

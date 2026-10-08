@@ -10,6 +10,8 @@ const TURNSTILE_SITE_KEY = "0x4AAAAAAFORduMdXxtZDB1o";
 
 const supabase = createClient(SUPABASE_URL, SUPABASE_KEY, {
   auth: {
+    // Isolate StorePOS and MotoPOS sessions on the shared GitHub Pages origin.
+    storageKey: "storepos-cloud-auth-v1",
     persistSession: true,
     autoRefreshToken: true,
     detectSessionInUrl: true
@@ -239,6 +241,46 @@ async function functionErrorDetails(error) {
     }
   } catch (_) {}
   return null;
+}
+
+// Verify the current session with Supabase Auth before privileged Edge calls.
+// Stored JWTs can outlive revoked sessions and otherwise produce opaque 401s.
+async function invokeProtectedStorePosFunction(name, options) {
+  const checked = await supabase.auth.getUser();
+  if (checked.error || !checked.data?.user) {
+    await expireStorePosSession();
+    return { data: null, error: new Error("Your StorePOS session has expired. Sign in again.") };
+  }
+
+  const { data: sessionData, error: sessionError } = await supabase.auth.getSession();
+  if (sessionError || !sessionData?.session?.access_token) {
+    await expireStorePosSession();
+    return { data: null, error: new Error("Your StorePOS session has expired. Sign in again.") };
+  }
+
+  const result = await supabase.functions.invoke(name, {
+    ...options,
+    headers: { ...options?.headers, Authorization: "Bearer " + sessionData.session.access_token }
+  });
+
+  if (result.error) {
+    const details = await functionErrorDetails(result.error);
+    if (details?.error) result.error.message = String(details.error).slice(0, 220);
+    if (result.error.context?.status === 401) {
+      await expireStorePosSession();
+      return { data: null, error: new Error("Your StorePOS session has expired. Sign in again.") };
+    }
+  }
+  return result;
+}
+
+async function expireStorePosSession() {
+  // Never revoke sessions across other applications or devices.
+  try { await supabase.auth.signOut({ scope: "local" }); } catch (_) {}
+  state.session = state.user = state.membership = state.shop = null;
+  state.isSystemAdmin = false;
+  state.entitlements = null;
+  setHash("login");
 }
 
 function friendlyError(error) {
@@ -1218,7 +1260,7 @@ function renderRequiredPasswordChange() {
     </div>`;
 
   document.querySelector("#required-password-signout")?.addEventListener("click", async()=>{
-    await supabase.auth.signOut();
+    await supabase.auth.signOut({ scope: "local" });
     state.session=state.user=state.membership=state.shop=null;
     state.entitlements=null;
     setHash("login");
@@ -1237,7 +1279,7 @@ function renderRequiredPasswordChange() {
     button.disabled=true;
     button.textContent="Updating password…";
 
-    const {data,error}=await supabase.functions.invoke("storepos-invite-staff",{
+    const {data,error}=await invokeProtectedStorePosFunction("storepos-invite-staff",{
       body:{action:"change_password",new_password:password}
     });
     if(error||data?.error){
@@ -1252,7 +1294,7 @@ function renderRequiredPasswordChange() {
     const refreshed=await supabase.auth.refreshSession();
     if(refreshed.error){
       toast("Password changed. Please sign in again.","success");
-      await supabase.auth.signOut();
+      await supabase.auth.signOut({ scope: "local" });
       setHash("login");
       return;
     }
@@ -1307,7 +1349,7 @@ function renderSetup() {
   });
 
   document.querySelector("#switch-account")?.addEventListener("click", async () => {
-    await supabase.auth.signOut();
+    await supabase.auth.signOut({ scope: "local" });
     state.session = state.user = state.membership = state.shop = null;
     state.isSystemAdmin = false;
     state.entitlements = null;
@@ -1383,7 +1425,7 @@ function renderShell(page) {
     </div>`;
 
   document.querySelector("#sign-out")?.addEventListener("click", async () => {
-    await supabase.auth.signOut();
+    await supabase.auth.signOut({ scope: "local" });
     state.session = state.user = state.membership = state.shop = null;
     state.isSystemAdmin = false;
     state.entitlements = null;
@@ -2096,7 +2138,7 @@ async function invokeStaffAdmin(body) {
   const inlineError=document.querySelector("#staff-inline-error");
   if(inlineError) inlineError.textContent="";
   try {
-    const {data,error}=await supabase.functions.invoke("storepos-invite-staff",{body});
+    const {data,error}=await invokeProtectedStorePosFunction("storepos-invite-staff",{body});
     if(error||data?.error){
       const details=error?await functionErrorDetails(error):data;
       const reason=details?.error||details?.message||details?.msg||data?.error||error;
@@ -3174,7 +3216,7 @@ async function pageSettings(root) {
     const original=button.textContent;
     button.disabled=true;button.textContent="Connecting securely…";
     try{
-      const {data,error}=await supabase.functions.invoke("storepos-paymongo-admin",{
+      const {data,error}=await invokeProtectedStorePosFunction("storepos-paymongo-admin",{
         body:{
           action:"connect",
           shop_id:state.shop.id,
@@ -3197,7 +3239,7 @@ async function pageSettings(root) {
 
   document.querySelector("#disconnect-paymongo")?.addEventListener("click",async()=>{
     if(!confirm("Disconnect PayMongo automatic payments for this shop? Existing payment history will be kept.")) return;
-    const {data,error}=await supabase.functions.invoke("storepos-paymongo-admin",{
+    const {data,error}=await invokeProtectedStorePosFunction("storepos-paymongo-admin",{
       body:{action:"disconnect",shop_id:state.shop.id}
     });
     if(error||data?.error) return toast(friendlyError(error||new Error(data.error)),"error");
@@ -3237,7 +3279,7 @@ async function renderAdmin() {
     </div>`;
 
   document.querySelector("#admin-sign-out")?.addEventListener("click", async()=>{
-    await supabase.auth.signOut(); state.session=state.user=null; setHash("");
+    await supabase.auth.signOut({ scope: "local" }); state.session=state.user=null; setHash("");
   });
 
   if(section==="users") await loadAdminUsers();
@@ -3467,7 +3509,7 @@ function openCustomOrderReview(order){
 async function loadAdminUsers() {
   const root=document.querySelector("#admin-content");
   if(!root) return;
-  const {data,error}=await supabase.functions.invoke("admin-users",{body:{action:"list"}});
+  const {data,error}=await invokeProtectedStorePosFunction("admin-users",{body:{action:"list"}});
   if(error||data?.error){
     root.innerHTML=`<div class="empty"><strong>Unable to load users</strong>${esc(friendlyError(data?.error||error))}</div>`;
     return;
@@ -3509,7 +3551,7 @@ async function loadAdminUsers() {
 }
 
 async function adminUserAction(userId,action){
-  const {data,error}=await supabase.functions.invoke("admin-users",{body:{action,user_id:userId}});
+  const {data,error}=await invokeProtectedStorePosFunction("admin-users",{body:{action,user_id:userId}});
   const details = error ? await functionErrorDetails(error) : null;
   const result = data || details;
 

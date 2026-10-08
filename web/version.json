@@ -3,5 +3,5 @@
   "app_code": "storepos",
   "product": "StorePOS Cloud",
   "released_at": "2026-10-08",
-  "summary": "Improves Cloudflare Turnstile reliability and troubleshooting with a light responsive widget, automatic retry, timeout refresh, exact error codes, unsupported-browser handling and an in-page Retry control."
+  "summary": "Fixes StorePOS staff account creation with StorePOS-native license checks and roles. Owners/admins can create cashier, manager, inventory and shop-admin accounts according to the active StorePOS plan."
 }

@@ -71,3 +71,13 @@ GitHub Pages is deployed from the `web/` directory by GitHub Actions.
 - Added exact Cloudflare Turnstile error-code display instead of the previous generic failure toast.
 - Added an in-page Retry action and specific messages for invalid site key, unauthorized hostname, timeout, clock/cache issues and browser challenge failures.
 - Added unsupported-browser and script-load diagnostics.
+
+
+## v1.5.2 — StorePOS Staff Fix
+- Rebuilt the live `invite-staff` Edge Function around StorePOS-native shop and license rules.
+- Removed MotoPOS plan names and motorcycle/mechanic role logic from StorePOS staff creation.
+- StorePOS owners and shop admins can create Cashier, Inventory Staff, Manager and Shop Admin accounts.
+- Validates the target shop as `app_code = storepos` and `business_type = retail`.
+- Uses StorePOS plan features and custom feature overrides when checking Staff Management access.
+- Enforces the StorePOS license/trial expiry and max-staff limit.
+- Creates the Auth user, user profile, shop membership and audit event as one guarded workflow with cleanup on failure.

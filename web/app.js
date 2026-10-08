@@ -501,7 +501,7 @@ function renderResources() {
   const androidRelease = "https://github.com/markyyy-lolz/StorePOS-Android/releases/tag/v1.6.2";
   const launcherRelease = "https://github.com/markyyy-lolz/StorePOS-Terminal-Launcher/releases/tag/v1.2.0";
   const launcherShaFile = "https://github.com/markyyy-lolz/StorePOS-Terminal-Launcher/releases/download/v1.2.0/StorePOS-Terminal-Launcher-v1.2.0.apk.sha256";
-  const androidSha = "1e55bed84eaa98c3ebc19054348d06418141f6d382caa5dc038f1809d2e66ec7";
+  const androidSha = "226ae57e6a263e5cfcf9cfe61166acd36b16de2ab49b541d3df0932bc49aedf2";
   const launcherSha = "5801a75d5decfc35a89c342b8e7c00ff14197d46e374acbefa47b2cfe66b576f";
   const deviceOwnerCommand = "adb shell dpm set-device-owner com.storepos.launcher/.admin.StorePosDeviceAdminReceiver";
 

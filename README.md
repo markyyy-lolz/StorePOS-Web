@@ -132,3 +132,8 @@ GitHub Pages is deployed from the `web/` directory by GitHub Actions.
 - Updated Resources Hub to StorePOS Android v1.6.3, version code 22.
 - Download link and SHA-256 validated against the official GitHub APK release.
 - Android v1.6.3 includes saving, sharing and printing PDF copies from completed sales history.
+
+
+## Android PDF Receipt Parity — v1.6.4
+- Updated Resources APK version, release link and SHA-256 digest.
+- Android receipt PDF now renders the same ESC/POS receipt data used for the Bluetooth/USB printout with real 58mm/80mm roll width.

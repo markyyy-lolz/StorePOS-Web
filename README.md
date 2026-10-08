@@ -94,3 +94,10 @@ GitHub Pages is deployed from the `web/` directory by GitHub Actions.
 - Added Staff page account metrics and management controls.
 - Staff creation, linking, role changes and activation changes are written to StorePOS audit logs.
 - StorePOS shop isolation remains enforced with `app_code = storepos` and retail workspace validation.
+
+
+## v1.5.4 — Android v1.6.2 Resources
+- Updated the Resources hub to StorePOS Android v1.6.2.
+- Updated direct APK and release-note links.
+- Updated Android version code to 21.
+- Updated the displayed SHA-256 checksum for the v1.6.2 APK.

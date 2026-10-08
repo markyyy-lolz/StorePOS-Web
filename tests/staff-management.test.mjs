@@ -7,8 +7,8 @@ const edge = readFileSync("supabase/functions/storepos-invite-staff/index.ts", "
 const grants = readFileSync("supabase/migrations/20261008_storepos_staff_v2_restore_service_role_grants.sql", "utf8");
 
 test("Cloud staff operations and first-login password change use the StorePOS-specific endpoint", () => {
-  assert.match(web, /supabase\\.functions\\.invoke\\("storepos-invite-staff"/);
-  assert.doesNotMatch(web, /supabase\\.functions\\.invoke\\("invite-staff"/);
+  assert.match(web, /supabase\.functions\.invoke\\("storepos-invite-staff"/);
+  assert.doesNotMatch(web, /supabase\.functions\.invoke\\("invite-staff"/);
 });
 
 test("Edge Function authenticates the caller and verifies the correct shop and owner/admin role", () => {
@@ -45,10 +45,10 @@ test("Server-side role changes, status changes, and audit entries are retained",
 });
 
 test("Migration only restores minimum service-role grants", () => {
-  assert.match(grants, /GRANT SELECT ON TABLE public\\.shop_licenses TO service_role;/);
-  assert.match(grants, /GRANT SELECT ON TABLE public\\.license_plans TO service_role;/);
-  assert.match(grants, /GRANT INSERT ON TABLE public\\.shop_members TO service_role;/);
-  assert.match(grants, /GRANT INSERT ON TABLE public\\.user_profiles TO service_role;/);
-  assert.match(grants, /GRANT INSERT ON TABLE public\\.audit_logs TO service_role;/);
+  assert.match(grants, /GRANT SELECT ON TABLE public\.shop_licenses TO service_role;/);
+  assert.match(grants, /GRANT SELECT ON TABLE public\.license_plans TO service_role;/);
+  assert.match(grants, /GRANT INSERT ON TABLE public\.shop_members TO service_role;/);
+  assert.match(grants, /GRANT INSERT ON TABLE public\.user_profiles TO service_role;/);
+  assert.match(grants, /GRANT INSERT ON TABLE public\.audit_logs TO service_role;/);
   assert.doesNotMatch(grants, /(?:DELETE FROM|TRUNCATE|DROP TABLE|ALTER TABLE)/i);
 });

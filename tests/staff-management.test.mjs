@@ -7,8 +7,8 @@ const edge = readFileSync("supabase/functions/storepos-invite-staff/index.ts", "
 const grants = readFileSync("supabase/migrations/20261008_storepos_staff_v2_restore_service_role_grants.sql", "utf8");
 
 test("Cloud staff operations and first-login password change use the StorePOS-specific endpoint", () => {
-  assert.match(web, /supabase\.functions\.invoke\\("storepos-invite-staff"/);
-  assert.doesNotMatch(web, /supabase\.functions\.invoke\\("invite-staff"/);
+  assert.match(web, /supabase\.functions\.invoke\("storepos-invite-staff"/);
+  assert.doesNotMatch(web, /supabase\.functions\.invoke\("invite-staff"/);
 });
 
 test("Edge Function authenticates the caller and verifies the correct shop and owner/admin role", () => {

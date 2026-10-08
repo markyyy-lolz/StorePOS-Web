@@ -2081,6 +2081,7 @@ function openStaffModal(root) {
       </div>
       <div class="verify-note"><strong>Existing email?</strong><span>If this email already has an account in another shop, request a separate invitation. StorePOS will not change its password or grant access automatically.</span></div>
       <div class="help">Staff Management requires a StorePOS plan with the Staff feature. Server-side checks enforce the shop, role and active-account limit.</div>
+      <div id="staff-inline-error" class="staff-inline-error" role="alert" aria-live="polite"></div>
       <div class="modal-actions">
         <button type="button" id="close-staff" class="btn btn-secondary">Cancel</button>
         <button type="submit" class="btn btn-primary">Create staff</button>
@@ -2092,14 +2093,29 @@ function openStaffModal(root) {
 }
 
 async function invokeStaffAdmin(body) {
-  const {data,error}=await supabase.functions.invoke("storepos-invite-staff",{body});
-  if(error||data?.error){
-    const details=error?await functionErrorDetails(error):null;
-    const message=data?.error||details?.error||details?.message||details?.msg||error;
-    toast(friendlyError(message),"error");
+  const inlineError=document.querySelector("#staff-inline-error");
+  if(inlineError) inlineError.textContent="";
+  try {
+    const {data,error}=await supabase.functions.invoke("storepos-invite-staff",{body});
+    if(error||data?.error){
+      const details=error?await functionErrorDetails(error):data;
+      const reason=details?.error||details?.message||details?.msg||data?.error||error;
+      const code=String(details?.code||data?.code||"").trim();
+      const requestId=String(details?.request_id||data?.request_id||"").trim();
+      const diagnostic=[code&&"Code: "+code,requestId&&"Reference: "+requestId].filter(Boolean).join(" · ");
+      const message=friendlyError(reason)+(diagnostic?" ("+diagnostic+")":"");
+      if(inlineError) inlineError.textContent=message;
+      toast(message,"error");
+      return {ok:false,data:null};
+    }
+    return {ok:true,data};
+  } catch (error) {
+    const message="Unable to contact StorePOS staff administration. Check your connection and retry.";
+    if(inlineError) inlineError.textContent=message;
+    console.error("StorePOS staff request failed",error);
+    toast(message,"error");
     return {ok:false,data:null};
   }
-  return {ok:true,data};
 }
 
 async function createStaff(event, root) {

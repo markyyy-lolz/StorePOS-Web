@@ -126,3 +126,9 @@ GitHub Pages is deployed from the `web/` directory by GitHub Actions.
 - Changed StorePOS sign-out to local scope (previously Supabase defaulted to global revocation).
 - Preserved StorePOS licenses, staff permissions, PayMongo entitlements and existing production records.
 - One-time StorePOS Cloud re-login is required after the new session-storage key is deployed.
+
+
+## v1.5.9 — Android PDF Receipts Resource
+- Updated Resources Hub to StorePOS Android v1.6.3, version code 22.
+- Download link and SHA-256 validated against the official GitHub APK release.
+- Android v1.6.3 includes saving, sharing and printing PDF copies from completed sales history.

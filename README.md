@@ -111,3 +111,10 @@ GitHub Pages is deployed from the `web/` directory by GitHub Actions.
 - Staff creation modal retains inputs and shows actionable errors inline.
 - Staff administration request failures are caught and displayed without clearing the user form.
 - Production Edge Function keeps JWT verification, shop ownership checks, StorePOS isolation and plan enforcement.
+
+## v1.5.7 — Staff Management v2 Authorization Repair
+- Restored the specific `service_role` table privileges required by the StorePOS staff Edge Function; no data reset.
+- StorePOS Cloud uses `storepos-invite-staff` for first-login password changes instead of the shared MotoPOS function.
+- Required password changes are only accepted for newly provisioned StorePOS staff whose server-controlled app metadata requires a password change.
+- Owner/admin, StorePOS-only shop checks, active license and staff-capacity checks remain server-side.
+- Android staff role/status controls must call the same StorePOS Edge Function; see the companion Android repository update.

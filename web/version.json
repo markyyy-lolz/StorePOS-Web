@@ -1,7 +1,7 @@
 {
-  "version": "1.5.9",
+  "version": "1.5.10",
   "app_code": "storepos",
   "product": "StorePOS Cloud",
   "released_at": "2026-10-08",
-  "summary": "Updated Resources Hub to official StorePOS Android v1.6.3 with permanent PDF receipt archive, signed APK and verified SHA-256."
+  "summary": "Resources Hub now provides StorePOS Android v1.6.4 with printer-identical 58mm/80mm PDF receipts and verified signed APK."
 }

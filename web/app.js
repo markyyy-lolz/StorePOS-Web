@@ -1198,6 +1198,71 @@ async function handleAuth(event) {
   }
 }
 
+
+function renderRequiredPasswordChange() {
+  app.innerHTML = `
+    <div class="setup password-change-screen">
+      <div class="setup-card password-change-card">
+        <div class="brand"><span class="brand-logo">S</span><span class="brand-copy"><strong>StorePOS</strong><small>Staff security</small></span></div>
+        <span class="eyebrow">First sign-in</span>
+        <h1>Choose your own password.</h1>
+        <p>Your StorePOS account was created with a temporary password. Change it before opening the workspace.</p>
+        <form id="required-password-form" class="form">
+          <div class="field"><label>New password</label><input class="input" type="password" name="password" minlength="8" required autocomplete="new-password" placeholder="At least 8 characters"></div>
+          <div class="field"><label>Confirm new password</label><input class="input" type="password" name="confirm_password" minlength="8" required autocomplete="new-password" placeholder="Enter it again"></div>
+          <div class="verify-note"><strong>Required once</strong><span>After this change, use your new password for StorePOS Cloud and StorePOS Android.</span></div>
+          <button class="btn btn-primary" type="submit">Change password & continue</button>
+          <button class="btn btn-secondary" type="button" id="required-password-signout">Sign out</button>
+        </form>
+      </div>
+    </div>`;
+
+  document.querySelector("#required-password-signout")?.addEventListener("click", async()=>{
+    await supabase.auth.signOut();
+    state.session=state.user=state.membership=state.shop=null;
+    state.entitlements=null;
+    setHash("login");
+  });
+
+  document.querySelector("#required-password-form")?.addEventListener("submit", async event=>{
+    event.preventDefault();
+    const fd=new FormData(event.currentTarget);
+    const password=String(fd.get("password")||"");
+    const confirmPassword=String(fd.get("confirm_password")||"");
+    if(password.length<8) return toast("New password must be at least 8 characters.","error");
+    if(password!==confirmPassword) return toast("Passwords do not match.","error");
+
+    const button=event.currentTarget.querySelector('button[type="submit"]');
+    const original=button.textContent;
+    button.disabled=true;
+    button.textContent="Updating password…";
+
+    const {data,error}=await supabase.functions.invoke("invite-staff",{
+      body:{action:"change_password",new_password:password}
+    });
+    if(error||data?.error){
+      const details=error?await functionErrorDetails(error):null;
+      const message=data?.error||details?.error||details?.message||details?.msg||error;
+      toast(friendlyError(message),"error");
+      button.disabled=false;
+      button.textContent=original;
+      return;
+    }
+
+    const refreshed=await supabase.auth.refreshSession();
+    if(refreshed.error){
+      toast("Password changed. Please sign in again.","success");
+      await supabase.auth.signOut();
+      setHash("login");
+      return;
+    }
+    state.session=refreshed.data.session;
+    await loadAccessContext();
+    toast("Password changed. Welcome to StorePOS.","success");
+    setHash("dashboard/overview");
+  });
+}
+
 function renderSetup() {
   app.innerHTML = `
     <div class="setup">
@@ -1917,6 +1982,7 @@ function openCustomerTools(root, customer) {
   });
 }
 
+
 async function pageStaff(root) {
   const canManage = ["owner","admin"].includes(state.membership.role);
   const { data, error } = await supabase.from("shop_members")
@@ -1924,26 +1990,83 @@ async function pageStaff(root) {
     .eq("shop_id",state.shop.id).order("joined_at");
   if (error) throw error;
 
+  const members=data||[];
+  const activeCount=members.filter(m=>m.is_active).length;
+  const staffOnlyCount=members.filter(m=>m.is_active&&m.role!=="owner").length;
+  const maxStaff=Number(state.entitlements?.max_staff||state.entitlements?.limits?.max_staff||0);
+
   root.innerHTML = `
     ${head(
       "Staff",
-      "Role-based access for the people working in your shop",
-      canManage ? '<button id="add-staff" class="btn btn-primary">Add staff account</button>' : ""
+      "Create and manage StorePOS cashier, inventory and manager accounts",
+      canManage ? '<button id="add-staff" class="btn btn-primary">+ Add staff account</button>' : ""
     )}
-    <div class="card" style="margin-bottom:14px">
-      <div class="help">Each staff member signs in with their own StorePOS account. Their Android screens are limited by the role assigned here.</div>
+    <section class="metrics retail-metrics compact staff-metrics">
+      <article class="metric retail-metric"><div class="metric-icon green">✓</div><div><div class="metric-label">Active accounts</div><div class="metric-value">${number(activeCount)}</div><div class="metric-sub">Owner + active staff</div></div></article>
+      <article class="metric retail-metric"><div class="metric-icon blue">#</div><div><div class="metric-label">Active staff</div><div class="metric-value">${number(staffOnlyCount)}</div><div class="metric-sub">Managers, cashiers and inventory staff</div></div></article>
+      <article class="metric retail-metric"><div class="metric-icon violet">◉</div><div><div class="metric-label">Plan</div><div class="metric-value staff-plan-value">${esc(state.entitlements?.plan_name||state.entitlements?.plan_code||"StorePOS")}</div><div class="metric-sub">${maxStaff>0?"Up to "+number(maxStaff)+" active accounts":"Server-enforced limits"}</div></div></article>
+      <article class="metric retail-metric"><div class="metric-icon amber">!</div><div><div class="metric-label">Inactive</div><div class="metric-value">${number(members.filter(m=>!m.is_active).length)}</div><div class="metric-sub">Can be reactivated by owner/admin</div></div></article>
+    </section>
+
+    <div class="card staff-info-card">
+      <div><strong>StorePOS-native staff access</strong><span>Temporary passwords are changed on first sign-in. Existing Auth accounts can be linked without resetting their password.</span></div>
     </div>
-    <div class="table-wrap"><table><thead><tr><th>Staff</th><th>Role</th><th>Status</th><th>Joined</th></tr></thead><tbody>
-      ${(data||[]).map(m=>`<tr><td><strong>${esc(m.profile?.display_name || "StorePOS user")}</strong><div class="help">${esc(m.user_id.slice(0,8))}…</div></td><td>${pill(m.role)}</td><td>${pill(m.is_active?"active":"inactive")}</td><td>${niceDate(m.joined_at)}</td></tr>`).join("") || '<tr><td colspan="4">No staff memberships found.</td></tr>'}
+
+    <div class="table-wrap retail-table-wrap"><table class="retail-table"><thead><tr><th>Staff</th><th>Role</th><th>Status</th><th>Joined</th>${canManage?"<th>Manage</th>":""}</tr></thead><tbody>
+      ${members.map(m=>{
+        const isSelf=m.user_id===state.user?.id;
+        const protectedOwner=m.role==="owner";
+        const protectedAdmin=state.membership.role==="admin"&&m.role==="admin";
+        const manageable=canManage&&!isSelf&&!protectedOwner&&!protectedAdmin;
+        return `<tr>
+          <td><div class="product-cell"><div class="product-avatar">${esc((m.profile?.display_name||"S").slice(0,1).toUpperCase())}</div><div><strong>${esc(m.profile?.display_name || "StorePOS user")}</strong><span>${esc(m.user_id.slice(0,8))}…${isSelf?" · You":""}</span></div></div></td>
+          <td>${manageable&&m.role!=="admin"?`
+            <select class="toolbar-select staff-role-select" data-user="${m.user_id}">
+              <option value="cashier" ${m.role==="cashier"?"selected":""}>Cashier</option>
+              <option value="inventory" ${m.role==="inventory"?"selected":""}>Inventory Staff</option>
+              <option value="manager" ${m.role==="manager"?"selected":""}>Manager</option>
+            </select>`:pill(m.role)}</td>
+          <td>${pill(m.is_active?"active":"inactive")}</td>
+          <td>${niceDate(m.joined_at)}</td>
+          ${canManage?`<td><div class="staff-actions">
+            ${manageable&&m.role!=="admin"?`<button class="btn btn-secondary btn-sm save-staff-role" data-user="${m.user_id}" data-current="${esc(m.role)}">Save role</button>`:""}
+            ${manageable?`<button class="btn ${m.is_active?"btn-danger":"btn-success"} btn-sm toggle-staff-active" data-user="${m.user_id}" data-active="${m.is_active?"0":"1"}">${m.is_active?"Deactivate":"Reactivate"}</button>`:""}
+            ${!manageable?'<span class="help">Protected</span>':""}
+          </div></td>`:""}
+        </tr>`;
+      }).join("") || `<tr><td colspan="${canManage?5:4}">No staff memberships found.</td></tr>`}
     </tbody></table></div>`;
 
   document.querySelector("#add-staff")?.addEventListener("click", () => openStaffModal(root));
+
+  root.querySelectorAll(".save-staff-role").forEach(button=>button.addEventListener("click",async()=>{
+    const userId=button.dataset.user;
+    const select=root.querySelector('.staff-role-select[data-user="'+userId+'"]');
+    const role=String(select?.value||"");
+    if(!role||role===button.dataset.current) return toast("Choose a different role first.","error");
+    button.disabled=true;const original=button.textContent;button.textContent="Saving…";
+    const result=await invokeStaffAdmin({action:"update_role",shop_id:state.shop.id,user_id:userId,role});
+    if(!result.ok){button.disabled=false;button.textContent=original;return;}
+    toast("Staff role updated.","success");
+    await pageStaff(root);
+  }));
+
+  root.querySelectorAll(".toggle-staff-active").forEach(button=>button.addEventListener("click",async()=>{
+    const userId=button.dataset.user;
+    const active=button.dataset.active==="1";
+    if(!confirm(active?"Reactivate this StorePOS staff account?":"Deactivate this StorePOS staff account?")) return;
+    button.disabled=true;
+    const result=await invokeStaffAdmin({action:"set_active",shop_id:state.shop.id,user_id:userId,active});
+    if(!result.ok){button.disabled=false;return;}
+    toast(active?"Staff account reactivated.":"Staff account deactivated.","success");
+    await pageStaff(root);
+  }));
 }
 
 function openStaffModal(root) {
   showModal(`
     <h2>Create staff account</h2>
-    <p>Create a StorePOS staff account with a temporary password. The new user can sign in immediately to StorePOS Android and StorePOS Cloud according to the assigned role.</p>
+    <p>Add a cashier, inventory staff member or manager to this StorePOS shop. New accounts receive a temporary password that must be changed on first sign-in.</p>
     <form id="staff-form" class="form">
       <div class="field"><label>Full name</label><input class="input" name="display_name" required placeholder="Juan Dela Cruz"></div>
       <div class="field"><label>Email address</label><input class="input" type="email" name="email" required placeholder="cashier@example.com"></div>
@@ -1954,10 +2077,10 @@ function openStaffModal(root) {
           <option value="cashier">Cashier</option>
           <option value="inventory">Inventory Staff</option>
           <option value="manager">Manager</option>
-          <option value="admin">Shop Admin</option>
         </select>
       </div>
-      <div class="help">The current StorePOS plan controls staff access and the maximum number of active accounts. StorePOS Basic does not include Staff Management.</div>
+      <div class="verify-note"><strong>Existing email?</strong><span>If that email already has a Supabase account, StorePOS links it safely to this shop and keeps the existing password.</span></div>
+      <div class="help">Staff Management requires a StorePOS plan with the Staff feature. Server-side checks enforce the shop, role and active-account limit.</div>
       <div class="modal-actions">
         <button type="button" id="close-staff" class="btn btn-secondary">Cancel</button>
         <button type="submit" class="btn btn-primary">Create staff</button>
@@ -1968,6 +2091,17 @@ function openStaffModal(root) {
   document.querySelector("#staff-form")?.addEventListener("submit", event => createStaff(event, root));
 }
 
+async function invokeStaffAdmin(body) {
+  const {data,error}=await supabase.functions.invoke("invite-staff",{body});
+  if(error||data?.error){
+    const details=error?await functionErrorDetails(error):null;
+    const message=data?.error||details?.error||details?.message||details?.msg||error;
+    toast(friendlyError(message),"error");
+    return {ok:false,data:null};
+  }
+  return {ok:true,data};
+}
+
 async function createStaff(event, root) {
   event.preventDefault();
   const form = new FormData(event.currentTarget);
@@ -1975,32 +2109,24 @@ async function createStaff(event, root) {
   button.disabled = true;
   button.textContent = "Creating…";
 
-  const { data, error } = await supabase.functions.invoke("invite-staff", {
-    body: {
-      shop_id: state.shop.id,
-      display_name: String(form.get("display_name") || "").trim(),
-      email: String(form.get("email") || "").trim(),
-      password: String(form.get("password") || ""),
-      role: String(form.get("role") || "cashier")
-    }
+  const result=await invokeStaffAdmin({
+    action:"create",
+    shop_id: state.shop.id,
+    display_name: String(form.get("display_name") || "").trim(),
+    email: String(form.get("email") || "").trim(),
+    password: String(form.get("password") || ""),
+    role: String(form.get("role") || "cashier")
   });
 
-  if (error || data?.error) {
-    const details = error ? await functionErrorDetails(error) : null;
-    const message =
-      data?.error ||
-      details?.error ||
-      details?.message ||
-      details?.msg ||
-      error;
-    toast(friendlyError(message), "error");
-    button.disabled = false;
-    button.textContent = "Create staff";
+  if(!result.ok){
+    button.disabled=false;
+    button.textContent="Create staff";
     return;
   }
 
+  const data=result.data||{};
   closeModal();
-  toast(`${data.display_name || "Staff account"} created as ${data.role}.`, "success");
+  toast(data.message || `${data.display_name || "Staff account"} created as ${data.role}.`, "success");
   await pageStaff(root);
 }
 
@@ -3919,6 +4045,11 @@ async function route() {
   if (!state.session) {
     if (path.startsWith("login")) renderAuth();
     else renderLanding();
+    return;
+  }
+
+  if (state.user?.app_metadata?.must_change_password) {
+    renderRequiredPasswordChange();
     return;
   }
 

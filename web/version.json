@@ -1,7 +1,7 @@
 {
-  "version": "1.5.8",
+  "version": "1.5.9",
   "app_code": "storepos",
   "product": "StorePOS Cloud",
   "released_at": "2026-10-08",
-  "summary": "Fix 401 Edge Function errors: StorePOS-specific browser sessions, local sign-out, session validation and readable backend errors."
+  "summary": "Updated Resources Hub to official StorePOS Android v1.6.3 with permanent PDF receipt archive, signed APK and verified SHA-256."
 }

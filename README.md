@@ -81,3 +81,16 @@ GitHub Pages is deployed from the `web/` directory by GitHub Actions.
 - Uses StorePOS plan features and custom feature overrides when checking Staff Management access.
 - Enforces the StorePOS license/trial expiry and max-staff limit.
 - Creates the Auth user, user profile, shop membership and audit event as one guarded workflow with cleanup on failure.
+
+
+## v1.5.3 — Staff Management v2
+- Upgraded the live `invite-staff` Supabase Edge Function to StorePOS-native v4.
+- Owner/shop-admin authorization is validated server-side against the exact StorePOS shop.
+- New staff roles are limited to Cashier, Inventory Staff and Manager.
+- StorePOS plan, Staff feature, expiration and active-account limits are enforced server-side.
+- Existing Supabase accounts can be linked safely without resetting their existing password.
+- Newly created staff accounts are marked for a required password change on first StorePOS Cloud sign-in.
+- Added server-side role changes and deactivate/reactivate actions.
+- Added Staff page account metrics and management controls.
+- Staff creation, linking, role changes and activation changes are written to StorePOS audit logs.
+- StorePOS shop isolation remains enforced with `app_code = storepos` and retail workspace validation.

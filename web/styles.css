@@ -1102,3 +1102,22 @@ body .category-empty{border-color:#dce3df!important}
   .turnstile-fallback{grid-template-columns:auto minmax(0,1fr)}
   .turnstile-fallback .btn{grid-column:1/-1;justify-self:start}
 }
+
+
+/* Staff Management v2 */
+.staff-metrics{margin-bottom:14px}
+.staff-plan-value{font-size:18px!important;line-height:1.2}
+.staff-info-card{margin-bottom:14px;padding:14px 16px!important}
+.staff-info-card>div{display:flex;flex-direction:column;gap:3px}
+.staff-info-card strong{font-size:11px;color:#1e293b}
+.staff-info-card span{font-size:9px;color:#64748b}
+.staff-actions{display:flex;align-items:center;gap:6px;flex-wrap:wrap}
+.staff-role-select{min-width:145px}
+.password-change-screen{background:#f6f8fa}
+.password-change-card{max-width:500px}
+.password-change-card .eyebrow{margin-top:22px}
+.password-change-card h1{margin:10px 0 8px;font-size:30px;letter-spacing:-.035em}
+@media(max-width:620px){
+  .staff-actions{align-items:stretch;flex-direction:column}
+  .staff-actions .btn,.staff-role-select{width:100%}
+}

@@ -536,14 +536,14 @@ function renderEmailVerified() {
 
 
 function renderResources() {
-  const androidVersion = "1.6.3";
+  const androidVersion = "1.6.4";
   const launcherVersion = "1.2.0";
-  const androidApk = "https://github.com/markyyy-lolz/StorePOS-Android/releases/download/v1.6.3/StorePOS-v1.6.3.apk";
+  const androidApk = "https://github.com/markyyy-lolz/StorePOS-Android/releases/download/v1.6.4/StorePOS-v1.6.4.apk";
   const launcherApk = "https://github.com/markyyy-lolz/StorePOS-Terminal-Launcher/releases/download/v1.2.0/StorePOS-Terminal-Launcher-v1.2.0.apk";
-  const androidRelease = "https://github.com/markyyy-lolz/StorePOS-Android/releases/tag/v1.6.3";
+  const androidRelease = "https://github.com/markyyy-lolz/StorePOS-Android/releases/tag/v1.6.4";
   const launcherRelease = "https://github.com/markyyy-lolz/StorePOS-Terminal-Launcher/releases/tag/v1.2.0";
   const launcherShaFile = "https://github.com/markyyy-lolz/StorePOS-Terminal-Launcher/releases/download/v1.2.0/StorePOS-Terminal-Launcher-v1.2.0.apk.sha256";
-  const androidSha = "d5d4db497e3427567f7c313b550c4935bf4ad83df1d14f65761f7c10f2e74c11";
+  const androidSha = "07a3d39ebd440bf536209a3be17019c1664ee1af4f8d6ced0ba5bd4465eddb1b";
   const launcherSha = "5801a75d5decfc35a89c342b8e7c00ff14197d46e374acbefa47b2cfe66b576f";
   const deviceOwnerCommand = "adb shell dpm set-device-owner com.storepos.launcher/.admin.StorePosDeviceAdminReceiver";
 
@@ -590,7 +590,7 @@ function renderResources() {
               <div class="resource-meta">
                 <span><b>Android</b> 8.0+</span>
                 <span><b>Package</b> com.storepos.app</span>
-                <span><b>Version code</b> 22</span>
+                <span><b>Version code</b> 23</span>
               </div>
               <div class="resource-actions">
                 <a class="btn btn-primary" href="${androidApk}">Download APK</a>

@@ -1,7 +1,7 @@
 {
-  "version": "1.5.2",
+  "version": "1.5.3",
   "app_code": "storepos",
   "product": "StorePOS Cloud",
   "released_at": "2026-10-08",
-  "summary": "Fixes StorePOS staff account creation with StorePOS-native license checks and roles. Owners/admins can create cashier, manager, inventory and shop-admin accounts according to the active StorePOS plan."
+  "summary": "Staff Management v2: StorePOS-native account creation, existing-account linking, first-login password change, staff role management, deactivate/reactivate controls, license-limit enforcement and audited server-side administration."
 }

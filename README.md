@@ -105,3 +105,9 @@ GitHub Pages is deployed from the `web/` directory by GitHub Actions.
 
 ## v1.5.5 — Final v1.6.2 Checksum
 - Synced the Resources hub to the final published StorePOS Android v1.6.2 APK SHA-256.
+
+## v1.5.6 — StorePOS Staff Diagnostics
+- Supabase Edge Function `storepos-invite-staff` returns sanitized error codes and reference IDs for database exceptions rather than a generic message.
+- Staff creation modal retains inputs and shows actionable errors inline.
+- Staff administration request failures are caught and displayed without clearing the user form.
+- Production Edge Function keeps JWT verification, shop ownership checks, StorePOS isolation and plan enforcement.

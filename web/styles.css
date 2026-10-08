@@ -1121,3 +1121,6 @@ body .category-empty{border-color:#dce3df!important}
   .staff-actions{align-items:stretch;flex-direction:column}
   .staff-actions .btn,.staff-role-select{width:100%}
 }
+
+/* StorePOS staff admin diagnostics */
+.staff-inline-error:not(:empty){margin-top:10px;padding:12px 14px;border:1px solid #fecaca;border-radius:10px;background:#fff1f2;color:#991b1b;font-size:12px;line-height:1.5;overflow-wrap:anywhere}

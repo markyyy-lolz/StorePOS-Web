@@ -1,7 +1,7 @@
 {
-  "version": "1.5.5",
+  "version": "1.5.6",
   "app_code": "storepos",
   "product": "StorePOS Cloud",
   "released_at": "2026-10-08",
-  "summary": "Synchronizes the StorePOS Resources hub with the final published v1.6.2 APK SHA-256 after release artifact publication."
+  "summary": "Staff Management diagnostics: server-side PostgREST error handling, safe failure codes and reference IDs, plus inline staff creation errors."
 }

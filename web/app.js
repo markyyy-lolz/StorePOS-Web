@@ -781,227 +781,57 @@ function renderManual() {
 }
 
 
-function renderLanding() {
-  app.innerHTML = `
-    <div class="public-shell retail-public">
-      <nav class="public-nav retail-public-nav">
-        <a href="#/" class="brand retail-brand">
-          <span class="brand-logo">S</span>
-          <span class="brand-copy"><strong>StorePOS</strong><small>Retail Cloud</small></span>
-        </a>
-        <div class="public-links">
-          <button class="public-link" type="button" data-scroll-target="features">Product</button>
-          <button class="public-link" type="button" data-scroll-target="workflow">How it works</button>
-          <button class="public-link" type="button" data-scroll-target="pricing">Pricing</button>
-          <a class="public-link" href="#/resources">Resources</a>
-          <a class="public-link" href="https://github.com/markyyy-lolz/StorePOS-Android/releases/latest" target="_blank" rel="noopener noreferrer">Download</a>
-        </div>
-        <div class="nav-actions">
-          <a class="btn btn-secondary" href="#/login">Sign in</a>
-          <a class="btn btn-primary" href="#/login?mode=signup">Start free</a>
-        </div>
-      </nav>
-
-      <main>
-        <section class="retail-hero">
-          <div class="retail-hero-copy">
-            <span class="retail-eyebrow"><i></i> Built for modern retail</span>
-            <h1>The smarter way to <span>run your store.</span></h1>
-            <p>Checkout, inventory, purchasing, customers, staff, payments and reports — connected in one StorePOS system built for everyday retail operations.</p>
-            <div class="retail-hero-actions">
-              <a class="btn btn-primary btn-lg" href="#/login?mode=signup">Start 7-day Pro trial</a>
-              <a class="btn btn-secondary btn-lg" href="https://github.com/markyyy-lolz/StorePOS-Android/releases/latest" target="_blank" rel="noopener noreferrer">Download Android app</a>
-            </div>
-            <div class="retail-proof">
-              <span><b>✓</b>No card required</span>
-              <span><b>✓</b>Cloud synchronized</span>
-              <span><b>✓</b>Android POS ready</span>
-            </div>
-          </div>
-
-          <div class="retail-hero-preview" aria-label="StorePOS dashboard preview">
-            <div class="preview-shell">
-              <aside class="preview-sidebar">
-                <div class="preview-logo"><span>S</span><strong>StorePOS</strong></div>
-                <div class="preview-nav active"><i></i>Overview</div>
-                <div class="preview-nav"><i></i>Sales</div>
-                <div class="preview-nav"><i></i>Inventory</div>
-                <div class="preview-nav"><i></i>Customers</div>
-                <div class="preview-nav"><i></i>Suppliers</div>
-                <div class="preview-nav"><i></i>Reports</div>
-              </aside>
-              <div class="preview-main">
-                <div class="preview-top">
-                  <div><small>Paombong Branch</small><strong>Good evening, Store Owner</strong></div>
-                  <span class="preview-avatar">MR</span>
-                </div>
-                <div class="preview-content">
-                  <div class="preview-metrics">
-                    <div><small>Gross sales</small><strong>₱28,450</strong><em>+12.4%</em></div>
-                    <div><small>Transactions</small><strong>87</strong><em>+8 today</em></div>
-                    <div><small>Gross profit</small><strong>₱8,910</strong><em>31.3%</em></div>
-                    <div><small>Low stock</small><strong>12</strong><em class="warn">5 critical</em></div>
-                  </div>
-                  <div class="preview-grid">
-                    <div class="preview-chart">
-                      <div class="preview-card-title"><strong>Sales performance</strong><small>7 days</small></div>
-                      <div class="preview-bars">
-                        <i style="height:44%"></i><i style="height:58%"></i><i style="height:49%"></i>
-                        <i style="height:74%"></i><i style="height:64%"></i><i style="height:91%"></i><i style="height:78%"></i>
-                      </div>
-                    </div>
-                    <div class="preview-sales">
-                      <div class="preview-card-title"><strong>Recent sales</strong><small>Live</small></div>
-                      <div><span>#1928 · GCash</span><b>₱450</b></div>
-                      <div><span>#1927 · Cash</span><b>₱780</b></div>
-                      <div><span>#1926 · Maya</span><b>₱1,240</b></div>
-                    </div>
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
-        </section>
-
-        <section class="retail-strip">
-          <div><strong>Fast checkout</strong><span>Barcode-ready sales</span></div>
-          <div><strong>Real-time stock</strong><span>Inventory that updates with sales</span></div>
-          <div><strong>Retail operations</strong><span>Purchasing, approvals and closing</span></div>
-          <div><strong>Cloud visibility</strong><span>Reports from anywhere you sign in</span></div>
-        </section>
-
-        <section class="retail-section" id="features">
-          <div class="retail-section-head">
-            <div>
-              <span class="section-kicker">Everything works together</span>
-              <h2>A retail command center, not just a sales screen.</h2>
-            </div>
-            <p>StorePOS connects the counter with your back office so owners, managers and staff work from the same operational data.</p>
-          </div>
-          <div class="retail-bento">
-            <article class="retail-bento-card retail-bento-large">
-              <div class="bento-icon">01</div>
-              <span class="bento-label">Checkout</span>
-              <h3>Fast POS for the counter.</h3>
-              <p>Barcode scanning, multiple payment methods, digital receipts, discounts and manager-controlled actions.</p>
-              <div class="mini-checkout">
-                <div><span>3 items</span><strong>₱1,248.00</strong></div>
-                <button type="button">Charge</button>
-              </div>
-            </article>
-            <article class="retail-bento-card">
-              <div class="bento-icon">02</div>
-              <span class="bento-label">Inventory</span>
-              <h3>Know what is on the shelf.</h3>
-              <p>Stock levels, reorder points, categories, batches, serials and retail pricing in one catalog.</p>
-              <div class="stock-meter"><i style="width:72%"></i></div>
-              <small>72% healthy stock coverage</small>
-            </article>
-            <article class="retail-bento-card">
-              <div class="bento-icon">03</div>
-              <span class="bento-label">Purchasing</span>
-              <h3>Control replenishment.</h3>
-              <p>Suppliers, purchase orders, receiving, transfers and reorder suggestions designed for store operations.</p>
-            </article>
-            <article class="retail-bento-card">
-              <div class="bento-icon">04</div>
-              <span class="bento-label">Customers</span>
-              <h3>Build repeat business.</h3>
-              <p>Customer profiles, loyalty, store credit, receivables and secure digital receipt access.</p>
-            </article>
-            <article class="retail-bento-card retail-bento-wide">
-              <div>
-                <div class="bento-icon">05</div>
-                <span class="bento-label">Control & insights</span>
-                <h3>See the business, not just transactions.</h3>
-                <p>Sales reporting, cashier operations, approvals, reconciliation, branch visibility, staff and device management.</p>
-              </div>
-              <div class="insight-list">
-                <span><b>Gross margin</b><strong>31.3%</strong></span>
-                <span><b>Low stock</b><strong>12 items</strong></span>
-                <span><b>Active devices</b><strong>3 online</strong></span>
-              </div>
-            </article>
-          </div>
-        </section>
-
-        <section class="retail-section workflow-section" id="workflow">
-          <div class="retail-section-head centered">
-            <div><span class="section-kicker">One connected workflow</span><h2>From barcode scan to cloud report.</h2></div>
-            <p>Every sale can update the rest of your store operations automatically.</p>
-          </div>
-          <div class="workflow-track">
-            ${[
-              ["01","Scan","Find products by barcode, SKU or search."],
-              ["02","Checkout","Complete the sale using your accepted payment method."],
-              ["03","Update","Inventory and transaction records stay synchronized."],
-              ["04","Receipt","Issue a printed or digital receipt."],
-              ["05","Report","Owners see current store performance in StorePOS Cloud."]
-            ].map(x=>`<article class="workflow-step"><span>${x[0]}</span><strong>${x[1]}</strong><p>${x[2]}</p></article>`).join("")}
-          </div>
-        </section>
-
-        <section class="retail-section">
-          <div class="retail-section-head">
-            <div><span class="section-kicker">Hardware friendly</span><h2>Made for a real checkout counter.</h2></div>
-            <p>Use StorePOS with supported Android hardware and common retail peripherals. Compatibility depends on the specific device and protocol.</p>
-          </div>
-          <div class="hardware-grid">
-            ${[
-              ["Tablet","Android POS / tablet"],
-              ["Scanner","USB or Bluetooth barcode scanner"],
-              ["Printer","ESC/POS thermal receipt printer"],
-              ["Display","Secondary customer display"],
-              ["Drawer","Supported cash drawer pulse"],
-              ["Terminal","Dedicated StorePOS launcher"]
-            ].map(x=>`<article class="hardware-item"><div>${x[0].slice(0,1)}</div><strong>${x[0]}</strong><span>${x[1]}</span></article>`).join("")}
-          </div>
-        </section>
-
-        <section class="retail-section" id="pricing">
-          <div class="retail-section-head">
-            <div><span class="section-kicker">StorePOS plans</span><h2>Start small. Upgrade when the store grows.</h2></div>
-            <p>Plan limits and enabled modules are enforced by StorePOS Cloud. New shops start with a free Pro trial.</p>
-          </div>
-          <div id="pricing-grid" class="pricing-grid retail-pricing">
-            <div class="loading-block"></div><div class="loading-block"></div><div class="loading-block"></div>
-          </div>
-        </section>
-
-        <section class="retail-section">
-          <div class="retail-cta">
-            <div>
-              <span class="section-kicker">Ready for your counter?</span>
-              <h2>Move your store from manual tracking to StorePOS.</h2>
-              <p>Create your workspace, add your products and connect your Android terminal.</p>
-            </div>
-            <div class="retail-cta-actions">
-              <a class="btn btn-primary btn-lg" href="#/login?mode=signup">Create StorePOS account</a>
-              <a class="btn btn-secondary btn-lg" href="#/manual">Read the manual</a>
-            </div>
-          </div>
-        </section>
-      </main>
-
-      <footer class="retail-footer">
-        <div class="footer-brand">
-          <div class="brand"><span class="brand-logo">S</span><span class="brand-copy"><strong>StorePOS</strong><small>Retail Cloud</small></span></div>
-          <p>Cloud-connected retail operations for modern stores.</p>
-        </div>
-        <div class="footer-links">
-          <div><strong>Product</strong><a href="#/login">Cloud dashboard</a><a href="https://github.com/markyyy-lolz/StorePOS-Android/releases/latest" target="_blank" rel="noopener noreferrer">Android app</a></div>
-          <div><strong>Resources</strong><a href="#/resources">Downloads & setup</a><a href="#/manual">App manual</a></div>
-          <div><strong>Account</strong><a href="#/login">Sign in</a><a href="#/login?mode=signup">Start free</a></div>
-        </div>
-        <div class="footer-bottom"><span>© 2026 StorePOS · Built by Mark Reymuel Pascual</span><span>Retail POS · Inventory · Operations · Cloud</span></div>
-      </footer>
-    </div>`;
-
-  document.querySelectorAll("[data-scroll-target]").forEach(button=>{
-    button.addEventListener("click",()=>document.getElementById(button.dataset.scrollTarget)?.scrollIntoView({behavior:"smooth",block:"start"}));
-  });
-  setupMotion();
-  loadPublicPlans();
+async function renderLanding() {
+  // Load only the public marketing experience. Signed-in workspace routes,
+  // payment webhooks, receipts and portal views stay unchanged.
+  try {
+    const response = await fetch(new URL("./landing-2026.html", import.meta.url), {
+      cache: "no-cache"
+    });
+    if (!response.ok) throw new Error("Website content could not be loaded (" + response.status + ")");
+    if (state.session || currentPath().startsWith("login")) return;
+    app.innerHTML = await response.text();
+    const mobileToggle = app.querySelector(".sp-menu-toggle");
+    const mobileMenu = app.querySelector("#sp-mobile-nav");
+    const closeMobileMenu = () => {
+      if (mobileMenu) mobileMenu.hidden = true;
+      mobileToggle?.setAttribute("aria-expanded", "false");
+    };
+    mobileToggle?.addEventListener("click", () => {
+      const open = mobileMenu?.hidden === true;
+      if (mobileMenu) mobileMenu.hidden = !open;
+      mobileToggle.setAttribute("aria-expanded", String(open));
+      mobileToggle.setAttribute("aria-label", open ? "Close navigation" : "Open navigation");
+    });
+    app.querySelectorAll("[data-sp-target]").forEach(link => {
+      link.addEventListener("click", event => {
+        const target = document.getElementById(link.dataset.spTarget);
+        if (!target) return;
+        event.preventDefault();
+        closeMobileMenu();
+        target.scrollIntoView({
+          behavior: window.matchMedia("(prefers-reduced-motion: reduce)").matches ? "auto" : "smooth",
+          block: "start"
+        });
+      });
+    });
+    const reveals = app.querySelectorAll(".sp-reveal");
+    if ("IntersectionObserver" in window && !window.matchMedia("(prefers-reduced-motion: reduce)").matches) {
+      const observer = new IntersectionObserver(entries => {
+        entries.forEach(entry => {
+          if (entry.isIntersecting) {
+            entry.target.classList.add("sp-visible");
+            observer.unobserve(entry.target);
+          }
+        });
+      }, { threshold: 0.08, rootMargin: "0px 0px -28px 0px" });
+      reveals.forEach(el => observer.observe(el));
+    } else reveals.forEach(el => el.classList.add("sp-visible"));
+    loadPublicPlans();
+  } catch (error) {
+    console.error("StorePOS landing error", error);
+    app.innerHTML = '<div class="setup"><div class="setup-card"><h1>StorePOS Cloud</h1><p>The public page could not load. Your account and data are unaffected.</p><a class="btn btn-primary" href="#/login">Sign in</a><button class="btn btn-secondary" onclick="location.reload()">Reload</button></div></div>';
+  }
 }
 
 async function loadPublicPlans() {
@@ -4102,7 +3932,7 @@ async function route() {
 
   if (!state.session) {
     if (path.startsWith("login")) renderAuth();
-    else renderLanding();
+    else await renderLanding();
     return;
   }
 

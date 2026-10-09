@@ -37,7 +37,7 @@ jobs:
           node --check web/category-manager.js
 
       - name: Check StorePOS staff management security contract
-        run: node --test tests/staff-management.test.mjs tests/auth-session.test.mjs
+        run: node --test tests/staff-management.test.mjs tests/auth-session.test.mjs tests/landing-rework.test.mjs
 
       - name: Configure Pages
         uses: actions/configure-pages@v5

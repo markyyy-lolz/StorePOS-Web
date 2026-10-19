@@ -1603,7 +1603,7 @@ async function pageInventory(root) {
   const renderProductRow=p=>{
         const stock=Number(p.stock_quantity||0), reorder=Number(p.reorder_level||0);
         const status=!p.is_active?"archived":stock<=0?"out":stock<=reorder?"low":"active";
-        const margin=Number(p.selling_price||0)>0?((Number(p.selling_price||0)-Number(p.cost_price||0))/Number(p.selling_price||0))*100:0;
+        const margin=Number(p.cost_price||0)>0&&Number(p.selling_price||0)>0?((Number(p.selling_price||0)-Number(p.cost_price||0))/Number(p.selling_price||0))*100:null;
         const search=[p.name,p.sku,p.barcode,p.brand].filter(Boolean).join(" ").toLowerCase();
         return `<tr data-product-row data-search="${esc(search)}" data-category="${esc(p.category_id||"")}" data-status="${status}">
           <td><div class="product-cell"><div class="product-avatar">${esc((p.name||"P").slice(0,1).toUpperCase())}</div><div><strong>${esc(p.name)}</strong><span>${esc(p.brand||p.item_type||"Retail product")}</span></div></div></td>
@@ -1612,7 +1612,7 @@ async function pageInventory(root) {
           <td><strong>${number(stock)} ${esc(p.unit||"pc")}</strong><div class="help">Reorder ${number(reorder)}</div></td>
           <td>${money(p.cost_price)}</td>
           <td><strong>${money(p.selling_price)}</strong></td>
-          <td><strong>${margin.toFixed(1)}%</strong></td>
+          <td><strong>${margin===null?"—":margin.toFixed(1)+"%"}</strong></td>
           <td>${status==="archived"?pill("inactive"):status==="out"?pill("out of stock"):status==="low"?pill("low stock"):pill("active")}</td>
           ${canManage?`<td><div class="inventory-actions">
             <button class="btn btn-secondary btn-sm edit-product" data-id="${p.id}">Edit</button>

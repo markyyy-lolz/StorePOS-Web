@@ -387,7 +387,7 @@ export async function pageRetail(root, ctx) {
   const shopId=ctx.state.shop.id;
   const canManage=['owner','admin','manager','inventory'].includes(String(ctx.state.membership.role||'').toLowerCase());
   const responses=await Promise.all([
-    ctx.supabase.from('products').select('id,name,sku,barcode,cost_price,selling_price,wholesale_price,retail_parent_id,retail_multiplier,wholesale_min,variant_group,variant_name,is_weighed,batch_tracked,serial_tracked,stock_quantity,reorder_level,track_stock,unit,is_active').eq('shop_id',shopId).order('name'),
+    ctx.fetchAllShopProducts('id,name,sku,barcode,cost_price,selling_price,wholesale_price,retail_parent_id,retail_multiplier,wholesale_min,variant_group,variant_name,is_weighed,batch_tracked,serial_tracked,stock_quantity,reorder_level,track_stock,unit,is_active'),
     ctx.supabase.from('retail_batches').select('*').eq('shop_id',shopId).order('expires_on',{ascending:true,nullsFirst:false}).limit(100),
     ctx.supabase.from('retail_serials').select('*').eq('shop_id',shopId).order('created_at',{ascending:false}).limit(100),
     ctx.supabase.from('retail_price_schedule').select('*').eq('shop_id',shopId).order('effective_at',{ascending:false}).limit(50),

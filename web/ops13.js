@@ -176,7 +176,7 @@ export async function pageStoreOps(root, ctx) {
   const purchasing=manager||role==="inventory";
 
   const responses=await Promise.all([
-    ctx.supabase.from("products").select("id,name,sku,barcode,cost_price,selling_price,stock_quantity,reorder_level,unit,is_active,track_stock").eq("shop_id",shopId).order("name"),
+    ctx.fetchAllShopProducts("id,name,sku,barcode,cost_price,selling_price,stock_quantity,reorder_level,unit,is_active,track_stock"),
     ctx.supabase.from("inventory_counts").select("*").eq("shop_id",shopId).order("created_at",{ascending:false}).limit(15),
     ctx.supabase.from("cashier_shifts").select("*").eq("shop_id",shopId).order("started_at",{ascending:false}).limit(30),
     ctx.supabase.from("z_reports").select("*").eq("shop_id",shopId).order("generated_at",{ascending:false}).limit(20),

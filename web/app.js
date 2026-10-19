@@ -1,6 +1,6 @@
 import { createClient } from "https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.117.2/+esm";
-import { pageRetail, renderDigitalReceipt } from "./retail.js?v=20261006-receipt-designer-v1";
-import { pageStoreOps } from "./ops13.js?v=20261005-v130";
+import { pageRetail, renderDigitalReceipt } from "./retail.js?v=20261019-pagination-v2";
+import { pageStoreOps } from "./ops13.js?v=20261019-pagination-v2";
 
 const SUPABASE_URL = "https://qgyzdoltjlryjthxxscw.supabase.co";
 const SUPABASE_KEY = "sb_publishable_mCjtfE-W75s1yyUdw2NY2g_z6ic5DIc";

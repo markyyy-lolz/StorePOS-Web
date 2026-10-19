@@ -1391,7 +1391,7 @@ async function pageOverview(root) {
 
   const [salesRes, productRes, expenseRes, alertRes] = await Promise.all([
     supabase.from("sales").select("id,total_amount,status,created_at,sale_number").eq("shop_id", shopId).order("created_at",{ascending:false}).limit(250),
-    fetchAllShopProducts("id,name,sku,stock_quantity,reorder_level,cost_price,selling_price", { activeOnly: true }),
+    supabase.rpc("storepos_overview_inventory_summary",{p_shop_id:shopId}),
     canFinance && hasOperations
       ? supabase.from("expenses").select("id,amount,expense_date").eq("shop_id",shopId).order("expense_date",{ascending:false}).limit(150)
       : Promise.resolve({data:[],error:null}),
@@ -1400,7 +1400,11 @@ async function pageOverview(root) {
   for (const r of [salesRes,productRes,expenseRes,alertRes]) if (r?.error) throw r.error;
 
   const sales = salesRes.data || [];
-  const products = productRes.data || [];
+  const inventorySummary = productRes.data || {};
+  const lowStock = Array.isArray(inventorySummary.low_stock_preview) ? inventorySummary.low_stock_preview : [];
+  const lowStockCount = Number(inventorySummary.low_stock_count || 0);
+  const outOfStockCount = Number(inventorySummary.out_of_stock_count || 0);
+  const inventoryValue = Number(inventorySummary.inventory_value || 0);
   const expenses = expenseRes.data || [];
   const alerts = alertRes.data || [];
   const now = new Date();
@@ -1412,9 +1416,6 @@ async function pageOverview(root) {
   const todaySales = completed.filter(s=>sameDay(s.created_at));
   const todayRevenue = todaySales.reduce((sum,s)=>sum+Number(s.total_amount||0),0);
   const todayExpense = expenses.filter(e=>sameDay(e.expense_date)).reduce((sum,e)=>sum+Number(e.amount||0),0);
-  const lowStock = products.filter(p=>Number(p.stock_quantity)<=Number(p.reorder_level));
-  const outOfStock = products.filter(p=>Number(p.stock_quantity)<=0);
-  const inventoryValue = products.reduce((sum,p)=>sum+Number(p.stock_quantity||0)*Number(p.cost_price||0),0);
   const greeting = now.getHours()<12 ? "Good morning" : now.getHours()<18 ? "Good afternoon" : "Good evening";
   const firstName=(state.user?.user_metadata?.display_name||state.user?.email||"Store owner").split(/[ @]/)[0];
   const dateLabel=new Intl.DateTimeFormat("en-PH",{weekday:"long",month:"long",day:"numeric",year:"numeric"}).format(now);
@@ -1444,7 +1445,7 @@ async function pageOverview(root) {
     <section class="metrics retail-metrics">
       <article class="metric retail-metric"><div class="metric-icon green">₱</div><div><div class="metric-label">Gross sales today</div><div class="metric-value">${money(todayRevenue)}</div><div class="metric-sub">${todaySales.length} completed transaction(s)</div></div></article>
       <article class="metric retail-metric"><div class="metric-icon blue">#</div><div><div class="metric-label">Transactions</div><div class="metric-value">${number(todaySales.length)}</div><div class="metric-sub">Today across allowed terminals</div></div></article>
-      <article class="metric retail-metric"><div class="metric-icon amber">!</div><div><div class="metric-label">Low stock</div><div class="metric-value">${number(lowStock.length)}</div><div class="metric-sub">${number(outOfStock.length)} currently out of stock</div></div></article>
+      <article class="metric retail-metric"><div class="metric-icon amber">!</div><div><div class="metric-label">Low stock</div><div class="metric-value">${number(lowStockCount)}</div><div class="metric-sub">${number(outOfStockCount)} currently out of stock</div></div></article>
       <article class="metric retail-metric"><div class="metric-icon violet">▦</div><div><div class="metric-label">Inventory cost</div><div class="metric-value">${money(inventoryValue)}</div><div class="metric-sub">Current on-hand stock × cost</div></div></article>
     </section>
 
@@ -1473,7 +1474,7 @@ async function pageOverview(root) {
 
     <section class="dashboard-grid lower">
       <div class="card attention-card">
-        <div class="card-title"><div><h3>Needs attention</h3><span>Prioritized store issues</span></div><span class="attention-count">${number(alerts.length||lowStock.length)}</span></div>
+        <div class="card-title"><div><h3>Needs attention</h3><span>Prioritized store issues</span></div><span class="attention-count">${number(alerts.length||lowStockCount)}</span></div>
         <div class="attention-list">
           ${alerts.length ? alerts.slice(0,6).map(a=>`
             <a class="attention-row ${esc(a.severity||"info")}" href="#/dashboard/${esc(a.action_page||"overview")}">

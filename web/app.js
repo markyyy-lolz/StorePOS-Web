@@ -1583,24 +1583,34 @@ async function pageSales(root) {
 
 async function pageInventory(root) {
   const canManage = ["owner","admin","manager","inventory"].includes(state.membership.role);
-  const [productRes, categoryRes] = await Promise.all([
-    fetchAllShopProducts("id,category_id,name,sku,barcode,brand,description,part_number,item_type,cost_price,selling_price,wholesale_price,stock_quantity,reorder_level,track_stock,unit,shelf_location,oem,warranty_days,is_active"),
-    supabase.from("product_categories")
-      .select("id,name,is_active")
-      .eq("shop_id",state.shop.id).order("sort_order").order("name")
+  const shopId=state.shop.id;
+  const PAGE_SIZE=100;
+  // Overview figures are aggregated in PostgreSQL; only one product page is
+  // transferred over the network. This keeps initial load independent of shop size.
+  const [pageRes, categoryRes, summaryRes]=await Promise.all([
+    supabase.rpc("storepos_inventory_page",{
+      p_shop_id:shopId,p_search:"",p_category_id:null,p_status:"",
+      p_offset:0,p_limit:PAGE_SIZE
+    }),
+    supabase.from("product_categories").select("id,name,is_active")
+      .eq("shop_id",shopId).order("sort_order").order("name"),
+    supabase.rpc("storepos_overview_inventory_summary",{p_shop_id:shopId})
   ]);
-  if (productRes.error) throw productRes.error;
-  if (categoryRes.error) throw categoryRes.error;
+  for(const result of [pageRes,categoryRes,summaryRes]) if(result.error) throw result.error;
+  if(!pageRes.data || !Array.isArray(pageRes.data.rows))
+    throw new Error("Inventory server returned an invalid product page.");
 
-  const products = productRes.data || [];
-  const categories = categoryRes.data || [];
+  let products=pageRes.data.rows;
+  let matchingTotal=Number(pageRes.data.total||0);
+  const grandTotal=matchingTotal;
+  const categories=categoryRes.data||[];
   const categoryMap=new Map(categories.map(x=>[x.id,x.name]));
-  const activeProducts=products.filter(p=>p.is_active);
-  const lowCount = activeProducts.filter(p=>Number(p.stock_quantity)<=Number(p.reorder_level)).length;
-  const outCount = activeProducts.filter(p=>Number(p.stock_quantity)<=0).length;
-  const stockValue = activeProducts.reduce((sum,p)=>sum+(Number(p.stock_quantity||0)*Number(p.cost_price||0)),0);
-
-  const productById=new Map(products.map(p=>[p.id,p]));
+  const summary=summaryRes.data||{};
+  const activeCount=Number(summary.active_products||0);
+  const lowCount=Number(summary.low_stock_count||0);
+  const outCount=Number(summary.out_of_stock_count||0);
+  const stockValue=Number(summary.inventory_value||0);
+  let productById=new Map(products.map(p=>[p.id,p]));
   const renderProductRow=p=>{
         const stock=Number(p.stock_quantity||0), reorder=Number(p.reorder_level||0);
         const status=!p.is_active?"archived":stock<=0?"out":stock<=reorder?"low":"active";
@@ -1630,7 +1640,7 @@ async function pageInventory(root) {
       canManage ? '<div class="actions"><button id="add-product" class="btn btn-primary">+ Add product</button></div>' : ""
     )}
     <section class="metrics retail-metrics compact">
-      <article class="metric retail-metric"><div class="metric-icon green">▦</div><div><div class="metric-label">Active products</div><div class="metric-value">${number(activeProducts.length)}</div><div class="metric-sub">Available catalog items</div></div></article>
+      <article class="metric retail-metric"><div class="metric-icon green">▦</div><div><div class="metric-label">Active products</div><div class="metric-value">${number(activeCount)}</div><div class="metric-sub">Available catalog items</div></div></article>
       <article class="metric retail-metric"><div class="metric-icon amber">!</div><div><div class="metric-label">Low stock</div><div class="metric-value">${number(lowCount)}</div><div class="metric-sub">At or below reorder level</div></div></article>
       <article class="metric retail-metric"><div class="metric-icon red">×</div><div><div class="metric-label">Out of stock</div><div class="metric-value">${number(outCount)}</div><div class="metric-sub">Needs replenishment</div></div></article>
       <article class="metric retail-metric"><div class="metric-icon blue">₱</div><div><div class="metric-label">Inventory cost</div><div class="metric-value">${money(stockValue)}</div><div class="metric-sub">Current stock × cost</div></div></article>
@@ -1649,7 +1659,7 @@ async function pageInventory(root) {
         <option value="out">Out of stock</option>
         <option value="archived">Archived</option>
       </select>
-      <span class="toolbar-count" id="inventory-visible-count">${number(products.length)} items</span>
+      <span class="toolbar-count" id="inventory-visible-count">${number(grandTotal)} items</span>
     </div>
 
     <div class="table-wrap retail-table-wrap"><table class="retail-table"><thead><tr><th>Product</th><th>SKU / Barcode</th><th>Category</th><th>Stock</th><th>Cost</th><th>Selling price</th><th>Margin</th><th>Status</th>${canManage?"<th>Manage</th>":""}</tr></thead><tbody>
@@ -1664,35 +1674,58 @@ async function pageInventory(root) {
   const pageLabel=root.querySelector("#inventory-page-label");
   const prevButton=root.querySelector("#inventory-prev");
   const nextButton=root.querySelector("#inventory-next");
-  const pageSize=100;
-  let currentPage=0,matchingProducts=products;
+  let currentPage=0,requestVersion=0,searchTimer=null,loading=false;
+
   function showPage(){
-    const count=Math.max(1,Math.ceil(matchingProducts.length/pageSize));
-    currentPage=Math.max(0,Math.min(currentPage,count-1));
-    const from=currentPage*pageSize,rows=matchingProducts.slice(from,from+pageSize);
-    productTable.innerHTML=rows.map(renderProductRow).join("") || `<tr><td colspan="${canManage?9:8}">No products match this filter.</td></tr>`;
-    countLabel.textContent=number(matchingProducts.length)+" matching / "+number(products.length)+" total";
-    pageLabel.textContent=matchingProducts.length?"Showing "+number(from+1)+"–"+number(from+rows.length)+" of "+number(matchingProducts.length):"No matching products";
-    prevButton.disabled=currentPage===0;
-    nextButton.disabled=currentPage>=count-1;
+    productById=new Map(products.map(p=>[p.id,p]));
+    productTable.innerHTML=products.map(renderProductRow).join("") ||
+      `<tr><td colspan="${canManage?9:8}">No products match this filter.</td></tr>`;
+    countLabel.textContent=number(matchingTotal)+" matching / "+number(grandTotal)+" total";
+    const start=currentPage*PAGE_SIZE;
+    pageLabel.textContent=matchingTotal
+      ?"Showing "+number(start+1)+"–"+number(start+products.length)+" of "+number(matchingTotal)
+      :"No matching products";
+    prevButton.disabled=loading||currentPage<=0;
+    nextButton.disabled=loading||(currentPage+1)*PAGE_SIZE>=matchingTotal;
   }
-  function applyFilters(){
-    const q=(root.querySelector("#inventory-search")?.value||"").trim().toLowerCase();
-    const category=root.querySelector("#inventory-category-filter")?.value||"";
+
+  async function fetchPage(pageNumber){
+    const version=++requestVersion;
+    const search=(root.querySelector("#inventory-search")?.value||"").trim();
+    const category=root.querySelector("#inventory-category-filter")?.value||null;
     const status=root.querySelector("#inventory-status-filter")?.value||"";
-    matchingProducts=products.filter(p=>{
-      const stock=Number(p.stock_quantity||0),reorder=Number(p.reorder_level||0);
-      const stateValue=!p.is_active?"archived":stock<=0?"out":stock<=reorder?"low":"active";
-      return (!q||[p.name,p.sku,p.barcode,p.brand].filter(Boolean).join(" ").toLowerCase().includes(q))
-        &&(!category||p.category_id===category)&&(!status||stateValue===status);
+    const requestedPage=Math.max(0,pageNumber);
+    loading=true;
+    prevButton.disabled=nextButton.disabled=true;
+    pageLabel.textContent="Loading products…";
+    const {data,error}=await supabase.rpc("storepos_inventory_page",{
+      p_shop_id:shopId,p_search:search,p_category_id:category,
+      p_status:status,p_offset:requestedPage*PAGE_SIZE,p_limit:PAGE_SIZE
     });
-    currentPage=0;showPage();
+    if(version!==requestVersion || !root.querySelector("#inventory-next")) return;
+    loading=false;
+    if(error || !data || !Array.isArray(data.rows)){
+      toast(friendlyError(error||new Error("Inventory response was invalid.")),"error");
+      showPage();
+      return;
+    }
+    products=data.rows;
+    matchingTotal=Number(data.total||0);
+    currentPage=requestedPage;
+    if(currentPage>0 && !products.length && matchingTotal>0){
+      return fetchPage(Math.max(0,Math.ceil(matchingTotal/PAGE_SIZE)-1));
+    }
+    showPage();
   }
-  root.querySelector("#inventory-search")?.addEventListener("input",applyFilters);
-  root.querySelector("#inventory-category-filter")?.addEventListener("change",applyFilters);
-  root.querySelector("#inventory-status-filter")?.addEventListener("change",applyFilters);
-  prevButton.addEventListener("click",()=>{currentPage--;showPage();});
-  nextButton.addEventListener("click",()=>{currentPage++;showPage();});
+  const resetAndLoad=()=>{clearTimeout(searchTimer);fetchPage(0);};
+  root.querySelector("#inventory-search")?.addEventListener("input",()=>{
+    clearTimeout(searchTimer);
+    searchTimer=setTimeout(()=>fetchPage(0),280);
+  });
+  root.querySelector("#inventory-category-filter")?.addEventListener("change",resetAndLoad);
+  root.querySelector("#inventory-status-filter")?.addEventListener("change",resetAndLoad);
+  prevButton.addEventListener("click",()=>{if(!loading&&currentPage>0)fetchPage(currentPage-1);});
+  nextButton.addEventListener("click",()=>{if(!loading&&(currentPage+1)*PAGE_SIZE<matchingTotal)fetchPage(currentPage+1);});
   root.querySelector("#add-product")?.addEventListener("click",()=>openProductModal(root,null,categories));
   productTable.addEventListener("click",async event=>{
     const button=event.target.closest("button[data-id]");
@@ -1706,7 +1739,9 @@ async function pageInventory(root) {
       if(active&&(!product.barcode||Number(product.selling_price||0)<=0))
         return toast("Verify barcode and set a positive selling price before activating.","error");
       button.disabled=true;
-      const {error}=await supabase.from("products").update({is_active:active,updated_at:new Date().toISOString()}).eq("id",product.id).eq("shop_id",state.shop.id);
+      const {error}=await supabase.from("products")
+        .update({is_active:active,updated_at:new Date().toISOString()})
+        .eq("id",product.id).eq("shop_id",shopId);
       if(error){button.disabled=false;return toast(friendlyError(error),"error");}
       toast(active?"Product restored.":"Product archived.","success");
       await pageInventory(root);

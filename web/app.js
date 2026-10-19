@@ -1349,9 +1349,37 @@ function head(title, subtitle, action = "") {
 }
 
 function retailContext() {
-  return { supabase, state, money, number, esc, niceDate, pill, head, toast, showModal, closeModal, friendlyError };
+  return { supabase, state, money, number, esc, niceDate, pill, head, toast, showModal, closeModal, friendlyError, fetchAllShopProducts };
 }
 
+
+// Query every shop product in stable pages. Some StorePOS environments cap
+// Supabase/PostgREST responses to 100 rows even if the database holds more.
+// Using a separate count keeps the loop correct when the server cap changes.
+async function fetchAllShopProducts(columns, { activeOnly = false } = {}) {
+  if (!state.shop?.id) throw new Error("Select a StorePOS shop first.");
+  const shopId = state.shop.id;
+  const rows = [];
+  const pageSize = 100;
+  let from = 0;
+  while (true) {
+    let query = supabase.from("products").select(columns, { count: "exact" })
+      .eq("shop_id", shopId).order("id", { ascending: true });
+    if (activeOnly) query = query.eq("is_active", true);
+    const { data, error, count } = await query.range(from, from + pageSize - 1);
+    if (error) throw error;
+    if (!Array.isArray(data)) throw new Error("Product list response was invalid.");
+    if (!data.length) {
+      if (count != null && from < count) throw new Error("Product pagination ended before all rows were received.");
+      break;
+    }
+    rows.push(...data);
+    from += data.length;
+    if (count != null ? from >= count : data.length < pageSize) break;
+    if (from > 100000) throw new Error("Product pagination exceeded the safety limit.");
+  }
+  return { data: rows, error: null };
+}
 
 async function pageOverview(root) {
   const shopId = state.shop.id;
@@ -1361,7 +1389,7 @@ async function pageOverview(root) {
 
   const [salesRes, productRes, expenseRes, alertRes] = await Promise.all([
     supabase.from("sales").select("id,total_amount,status,created_at,sale_number").eq("shop_id", shopId).order("created_at",{ascending:false}).limit(250),
-    supabase.from("products").select("id,name,sku,stock_quantity,reorder_level,cost_price,selling_price").eq("shop_id",shopId).eq("is_active",true),
+    fetchAllShopProducts("id,name,sku,stock_quantity,reorder_level,cost_price,selling_price", { activeOnly: true }),
     canFinance && hasOperations
       ? supabase.from("expenses").select("id,amount,expense_date").eq("shop_id",shopId).order("expense_date",{ascending:false}).limit(150)
       : Promise.resolve({data:[],error:null}),
@@ -1553,9 +1581,7 @@ async function pageSales(root) {
 async function pageInventory(root) {
   const canManage = ["owner","admin","manager","inventory"].includes(state.membership.role);
   const [productRes, categoryRes] = await Promise.all([
-    supabase.from("products")
-      .select("id,category_id,name,sku,barcode,brand,description,part_number,item_type,cost_price,selling_price,wholesale_price,stock_quantity,reorder_level,track_stock,unit,shelf_location,oem,warranty_days,is_active")
-      .eq("shop_id",state.shop.id).order("name"),
+    fetchAllShopProducts("id,category_id,name,sku,barcode,brand,description,part_number,item_type,cost_price,selling_price,wholesale_price,stock_quantity,reorder_level,track_stock,unit,shelf_location,oem,warranty_days,is_active"),
     supabase.from("product_categories")
       .select("id,name,is_active")
       .eq("shop_id",state.shop.id).order("sort_order").order("name")
@@ -2036,7 +2062,7 @@ async function pageQuotes(root) {
     supabase.from("quotations").select("id,quote_number,customer_id,retail_id,status,subtotal,discount_amount,total_amount,valid_until,notes,created_at").eq("shop_id",state.shop.id).order("created_at",{ascending:false}).limit(100),
     supabase.from("customers").select("id,name").eq("shop_id",state.shop.id).eq("is_active",true).order("name"),
     supabase.from("retails").select("id,customer_id,make,model,plate_number").eq("shop_id",state.shop.id),
-    supabase.from("products").select("id,name,sku,selling_price,is_active").eq("shop_id",state.shop.id).eq("is_active",true).order("name")
+    fetchAllShopProducts("id,name,sku,selling_price,is_active", { activeOnly: true })
   ]);
   for(const r of [quoteRes,customerRes,bikeRes,productRes]) if(r.error) throw r.error;
   const quotes=quoteRes.data||[];
@@ -2272,7 +2298,7 @@ async function pageBranches(root) {
   const groups=groupRes.data||[];
   const transfers=transferRes.data||[];
   const otherBranches=branches.filter(b=>b.id!==state.shop.id);
-  const productsRes=await supabase.from("products").select("id,name,sku,stock_quantity,cost_price").eq("shop_id",state.shop.id).eq("is_active",true).order("name");
+  const productsRes=await fetchAllShopProducts("id,name,sku,stock_quantity,cost_price", { activeOnly: true });
   if(productsRes.error) throw productsRes.error;
   const products=productsRes.data||[];
 
@@ -2854,13 +2880,17 @@ async function pageDevices(root) {
 async function fetchAllShopRows(table) {
   const rows=[];
   let from=0;
-  const pageSize=1000;
+  const pageSize=100;
   while(true){
-    const {data,error}=await supabase.from(table).select("*").eq("shop_id",state.shop.id).range(from,from+pageSize-1);
+    const {data,error,count}=await supabase.from(table).select("*",{count:"exact"})
+      .eq("shop_id",state.shop.id).order("id",{ascending:true}).range(from,from+pageSize-1);
     if(error) throw error;
-    rows.push(...(data||[]));
-    if(!data || data.length<pageSize) break;
-    from+=pageSize;
+    if(!Array.isArray(data)) throw new Error("Invalid export data.");
+    rows.push(...data);
+    from+=data.length;
+    if(count!=null ? from>=count : data.length<pageSize) break;
+    if(!data.length) throw new Error("Incomplete export: database stopped returning rows.");
+    if(from>100000) throw new Error("Export exceeds the safety limit.");
   }
   return rows;
 }

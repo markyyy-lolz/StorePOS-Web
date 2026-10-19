@@ -1597,6 +1597,29 @@ async function pageInventory(root) {
   const outCount = activeProducts.filter(p=>Number(p.stock_quantity)<=0).length;
   const stockValue = activeProducts.reduce((sum,p)=>sum+(Number(p.stock_quantity||0)*Number(p.cost_price||0)),0);
 
+  const productById=new Map(products.map(p=>[p.id,p]));
+  const renderProductRow=p=>{
+        const stock=Number(p.stock_quantity||0), reorder=Number(p.reorder_level||0);
+        const status=!p.is_active?"archived":stock<=0?"out":stock<=reorder?"low":"active";
+        const margin=Number(p.selling_price||0)>0?((Number(p.selling_price||0)-Number(p.cost_price||0))/Number(p.selling_price||0))*100:0;
+        const search=[p.name,p.sku,p.barcode,p.brand].filter(Boolean).join(" ").toLowerCase();
+        return `<tr data-product-row data-search="${esc(search)}" data-category="${esc(p.category_id||"")}" data-status="${status}">
+          <td><div class="product-cell"><div class="product-avatar">${esc((p.name||"P").slice(0,1).toUpperCase())}</div><div><strong>${esc(p.name)}</strong><span>${esc(p.brand||p.item_type||"Retail product")}</span></div></div></td>
+          <td><strong>${esc(p.sku)}</strong><div class="help">${esc(p.barcode||"No barcode")}</div></td>
+          <td>${esc(categoryMap.get(p.category_id)||"Uncategorized")}</td>
+          <td><strong>${number(stock)} ${esc(p.unit||"pc")}</strong><div class="help">Reorder ${number(reorder)}</div></td>
+          <td>${money(p.cost_price)}</td>
+          <td><strong>${money(p.selling_price)}</strong></td>
+          <td><strong>${margin.toFixed(1)}%</strong></td>
+          <td>${status==="archived"?pill("inactive"):status==="out"?pill("out of stock"):status==="low"?pill("low stock"):pill("active")}</td>
+          ${canManage?`<td><div class="inventory-actions">
+            <button class="btn btn-secondary btn-sm edit-product" data-id="${p.id}">Edit</button>
+            <button class="btn btn-secondary btn-sm adjust-stock" data-id="${p.id}">Stock</button>
+            <button class="btn ${p.is_active?"btn-danger":"btn-success"} btn-sm toggle-product" data-id="${p.id}" data-active="${p.is_active?"0":"1"}">${p.is_active?"Archive":"Restore"}</button>
+          </div></td>`:""}
+        </tr>`;
+      };
+
   root.innerHTML = `
     ${head(
       "Inventory",
@@ -1627,63 +1650,66 @@ async function pageInventory(root) {
     </div>
 
     <div class="table-wrap retail-table-wrap"><table class="retail-table"><thead><tr><th>Product</th><th>SKU / Barcode</th><th>Category</th><th>Stock</th><th>Cost</th><th>Selling price</th><th>Margin</th><th>Status</th>${canManage?"<th>Manage</th>":""}</tr></thead><tbody>
-      ${products.map(p=>{
-        const stock=Number(p.stock_quantity||0), reorder=Number(p.reorder_level||0);
-        const status=!p.is_active?"archived":stock<=0?"out":stock<=reorder?"low":"active";
-        const margin=Number(p.selling_price||0)>0?((Number(p.selling_price||0)-Number(p.cost_price||0))/Number(p.selling_price||0))*100:0;
-        const search=[p.name,p.sku,p.barcode,p.brand].filter(Boolean).join(" ").toLowerCase();
-        return `<tr data-product-row data-search="${esc(search)}" data-category="${esc(p.category_id||"")}" data-status="${status}">
-          <td><div class="product-cell"><div class="product-avatar">${esc((p.name||"P").slice(0,1).toUpperCase())}</div><div><strong>${esc(p.name)}</strong><span>${esc(p.brand||p.item_type||"Retail product")}</span></div></div></td>
-          <td><strong>${esc(p.sku)}</strong><div class="help">${esc(p.barcode||"No barcode")}</div></td>
-          <td>${esc(categoryMap.get(p.category_id)||"Uncategorized")}</td>
-          <td><strong>${number(stock)} ${esc(p.unit||"pc")}</strong><div class="help">Reorder ${number(reorder)}</div></td>
-          <td>${money(p.cost_price)}</td>
-          <td><strong>${money(p.selling_price)}</strong></td>
-          <td><strong>${margin.toFixed(1)}%</strong></td>
-          <td>${status==="archived"?pill("inactive"):status==="out"?pill("out of stock"):status==="low"?pill("low stock"):pill("active")}</td>
-          ${canManage?`<td><div class="inventory-actions">
-            <button class="btn btn-secondary btn-sm edit-product" data-id="${p.id}">Edit</button>
-            <button class="btn btn-secondary btn-sm adjust-stock" data-id="${p.id}">Stock</button>
-            <button class="btn ${p.is_active?"btn-danger":"btn-success"} btn-sm toggle-product" data-id="${p.id}" data-active="${p.is_active?"0":"1"}">${p.is_active?"Archive":"Restore"}</button>
-          </div></td>`:""}
-        </tr>`;
-      }).join("") || `<tr><td colspan="${canManage?9:8}"><div class="retail-empty"><strong>No products yet.</strong><span>Add your first item or use the Retail Suite CSV import.</span></div></td></tr>`}
-    </tbody></table></div>`;
+    </tbody></table></div>
+    <div class="data-toolbar inventory-toolbar">
+      <span class="toolbar-count" id="inventory-page-label">Loading catalog…</span>
+      <div class="actions"><button class="btn btn-secondary btn-sm" id="inventory-prev" type="button">Previous</button><button class="btn btn-secondary btn-sm" id="inventory-next" type="button">Next</button></div>
+    </div>`;
 
-  const applyFilters=()=>{
-    const q=String(document.querySelector("#inventory-search")?.value||"").trim().toLowerCase();
-    const category=String(document.querySelector("#inventory-category-filter")?.value||"");
-    const status=String(document.querySelector("#inventory-status-filter")?.value||"");
-    let visible=0;
-    root.querySelectorAll("[data-product-row]").forEach(row=>{
-      const show=(!q||row.dataset.search.includes(q))&&(!category||row.dataset.category===category)&&(!status||row.dataset.status===status);
-      row.hidden=!show;if(show)visible++;
+  const productTable=root.querySelector(".retail-table tbody");
+  const countLabel=root.querySelector("#inventory-visible-count");
+  const pageLabel=root.querySelector("#inventory-page-label");
+  const prevButton=root.querySelector("#inventory-prev");
+  const nextButton=root.querySelector("#inventory-next");
+  const pageSize=100;
+  let currentPage=0,matchingProducts=products;
+  function showPage(){
+    const count=Math.max(1,Math.ceil(matchingProducts.length/pageSize));
+    currentPage=Math.max(0,Math.min(currentPage,count-1));
+    const from=currentPage*pageSize,rows=matchingProducts.slice(from,from+pageSize);
+    productTable.innerHTML=rows.map(renderProductRow).join("") || `<tr><td colspan="${canManage?9:8}">No products match this filter.</td></tr>`;
+    countLabel.textContent=number(matchingProducts.length)+" matching / "+number(products.length)+" total";
+    pageLabel.textContent=matchingProducts.length?"Showing "+number(from+1)+"–"+number(from+rows.length)+" of "+number(matchingProducts.length):"No matching products";
+    prevButton.disabled=currentPage===0;
+    nextButton.disabled=currentPage>=count-1;
+  }
+  function applyFilters(){
+    const q=(root.querySelector("#inventory-search")?.value||"").trim().toLowerCase();
+    const category=root.querySelector("#inventory-category-filter")?.value||"";
+    const status=root.querySelector("#inventory-status-filter")?.value||"";
+    matchingProducts=products.filter(p=>{
+      const stock=Number(p.stock_quantity||0),reorder=Number(p.reorder_level||0);
+      const stateValue=!p.is_active?"archived":stock<=0?"out":stock<=reorder?"low":"active";
+      return (!q||[p.name,p.sku,p.barcode,p.brand].filter(Boolean).join(" ").toLowerCase().includes(q))
+        &&(!category||p.category_id===category)&&(!status||stateValue===status);
     });
-    const counter=document.querySelector("#inventory-visible-count"); if(counter) counter.textContent=number(visible)+" items";
-  };
-  document.querySelector("#inventory-search")?.addEventListener("input",applyFilters);
-  document.querySelector("#inventory-category-filter")?.addEventListener("change",applyFilters);
-  document.querySelector("#inventory-status-filter")?.addEventListener("change",applyFilters);
-
-  document.querySelector("#add-product")?.addEventListener("click",()=>openProductModal(root,null,categories));
-  root.querySelectorAll(".edit-product").forEach(btn=>{
-    const product=products.find(p=>p.id===btn.dataset.id);
-    btn.addEventListener("click",()=>openProductModal(root,product,categories));
+    currentPage=0;showPage();
+  }
+  root.querySelector("#inventory-search")?.addEventListener("input",applyFilters);
+  root.querySelector("#inventory-category-filter")?.addEventListener("change",applyFilters);
+  root.querySelector("#inventory-status-filter")?.addEventListener("change",applyFilters);
+  prevButton.addEventListener("click",()=>{currentPage--;showPage();});
+  nextButton.addEventListener("click",()=>{currentPage++;showPage();});
+  root.querySelector("#add-product")?.addEventListener("click",()=>openProductModal(root,null,categories));
+  productTable.addEventListener("click",async event=>{
+    const button=event.target.closest("button[data-id]");
+    if(!button)return;
+    const product=productById.get(button.dataset.id);
+    if(!product)return;
+    if(button.classList.contains("edit-product"))return openProductModal(root,product,categories);
+    if(button.classList.contains("adjust-stock"))return openStockModal(root,product);
+    if(button.classList.contains("toggle-product")){
+      const active=button.dataset.active==="1";
+      if(active&&(!product.barcode||Number(product.selling_price||0)<=0))
+        return toast("Verify barcode and set a positive selling price before activating.","error");
+      button.disabled=true;
+      const {error}=await supabase.from("products").update({is_active:active,updated_at:new Date().toISOString()}).eq("id",product.id).eq("shop_id",state.shop.id);
+      if(error){button.disabled=false;return toast(friendlyError(error),"error");}
+      toast(active?"Product restored.":"Product archived.","success");
+      await pageInventory(root);
+    }
   });
-  root.querySelectorAll(".adjust-stock").forEach(btn=>{
-    const product=products.find(p=>p.id===btn.dataset.id);
-    btn.addEventListener("click",()=>openStockModal(root,product));
-  });
-  root.querySelectorAll(".toggle-product").forEach(btn=>btn.addEventListener("click",async()=>{
-    const active=btn.dataset.active==="1";
-    const { error } = await supabase.from("products")
-      .update({is_active:active,updated_at:new Date().toISOString()})
-      .eq("id",btn.dataset.id)
-      .eq("shop_id",state.shop.id);
-    if(error) return toast(friendlyError(error),"error");
-    toast(active?"Product restored.":"Product archived.","success");
-    await pageInventory(root);
-  }));
+  showPage();
 }
 
 function openProductModal(root, product, categories) {

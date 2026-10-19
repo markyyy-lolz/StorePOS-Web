@@ -1378,6 +1378,8 @@ async function fetchAllShopProducts(columns, { activeOnly = false } = {}) {
     if (count != null ? from >= count : data.length < pageSize) break;
     if (from > 100000) throw new Error("Product pagination exceeded the safety limit.");
   }
+  // Keep the UI alphabetical while fetching each page in stable ID order.
+  rows.sort((a,b)=>String(a.name||"").localeCompare(String(b.name||""),undefined,{sensitivity:"base"})||String(a.id||"").localeCompare(String(b.id||"")));
   return { data: rows, error: null };
 }
 

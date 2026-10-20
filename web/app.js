@@ -1637,7 +1637,7 @@ async function pageInventory(root) {
     ${head(
       "Inventory",
       "Products, pricing, stock levels and retail availability",
-      canManage ? '<div class="actions"><button id="add-product" class="btn btn-primary">+ Add product</button></div>' : ""
+      canManage ? '<div class="actions"><button id="inventory-bulk-stocktake" class="btn btn-secondary">Bulk Price &amp; Stock</button><button id="add-product" class="btn btn-primary">+ Add product</button></div>' : ""
     )}
     <section class="metrics retail-metrics compact">
       <article class="metric retail-metric"><div class="metric-icon green">▦</div><div><div class="metric-label">Active products</div><div class="metric-value">${number(activeCount)}</div><div class="metric-sub">Available catalog items</div></div></article>
@@ -1726,6 +1726,7 @@ async function pageInventory(root) {
   root.querySelector("#inventory-status-filter")?.addEventListener("change",resetAndLoad);
   prevButton.addEventListener("click",()=>{if(!loading&&currentPage>0)fetchPage(currentPage-1);});
   nextButton.addEventListener("click",()=>{if(!loading&&(currentPage+1)*PAGE_SIZE<matchingTotal)fetchPage(currentPage+1);});
+  root.querySelector("#inventory-bulk-stocktake")?.addEventListener("click",()=>openGroceryStocktakeModal(root));
   root.querySelector("#add-product")?.addEventListener("click",()=>openProductModal(root,null,categories));
   productTable.addEventListener("click",async event=>{
     const button=event.target.closest("button[data-id]");
@@ -1748,6 +1749,119 @@ async function pageInventory(root) {
     }
   });
   showPage();
+}
+
+
+function openGroceryStocktakeModal(root) {
+  if (!["owner","admin","manager","inventory"].includes(state.membership?.role)) {
+    return toast("Inventory management permission required.", "error");
+  }
+  showModal([
+    '<h2>Bulk Price &amp; Physical Stocktake</h2>',
+    '<p>Update up to 200 <strong>existing</strong> products at once. Use barcode or SKU; do not create duplicate products. Paste actual Sherine selling prices and shelf counts, not other-store references or estimated inventory.</p>',
+    '<div class="help">CSV header: <code>code,selling_price,counted_stock,activate</code>. Leave a field blank to keep its current value. For activation use <code>yes</code> or <code>no</code>. Barcode codes beginning with 0 must stay as text.</div>',
+    '<div class="field"><label>Price and stock CSV</label><textarea class="input" id="grocery-stocktake-csv" rows="12" spellcheck="false" placeholder="code,selling_price,counted_stock,activate&#10;4800000000000,45.50,12,yes">code,selling_price,counted_stock,activate</textarea></div>',
+    '<div id="grocery-stocktake-feedback" class="help" aria-live="polite">Review each product before applying. No changes are made in Preview.</div>',
+    '<div class="modal-actions">',
+    '<button type="button" class="btn btn-secondary" id="grocery-stocktake-close">Cancel</button>',
+    '<button type="button" class="btn btn-secondary" id="grocery-stocktake-preview">Preview changes</button>',
+    '<button type="button" class="btn btn-primary" id="grocery-stocktake-apply" disabled>Apply confirmed changes</button>',
+    '</div>'
+  ].join(''));
+  const modal=modalRoot;
+  const area=modal.querySelector("#grocery-stocktake-csv");
+  const feedback=modal.querySelector("#grocery-stocktake-feedback");
+  const previewButton=modal.querySelector("#grocery-stocktake-preview");
+  const applyButton=modal.querySelector("#grocery-stocktake-apply");
+  let previewedRows=null,previewedText=null,busy=false;
+
+  function parseRows(raw) {
+    const lines=String(raw).split(/\r?\n/).filter(x=>x.trim());
+    if (lines.length<2 || lines.length>201) throw new Error("Enter a CSV header and 1–200 product rows.");
+    const header=lines[0].split(",").map(x=>x.trim().toLowerCase());
+    if (header.join(",")!=="code,selling_price,counted_stock,activate") {
+      throw new Error("Use the exact CSV header: code,selling_price,counted_stock,activate.");
+    }
+    return lines.slice(1).map((line,index)=>{
+      const cells=line.split(",").map(x=>x.trim());
+      if (cells.length!==4 || !cells[0]) throw new Error("Row "+(index+2)+": enter a SKU/barcode and exactly four CSV columns.");
+      const entry={code:cells[0]};
+      if (cells[1]!=="") {
+        const value=Number(cells[1]);
+        if (!Number.isFinite(value)||value<0) throw new Error("Row "+(index+2)+": invalid selling price.");
+        entry.selling_price=value;
+      }
+      if (cells[2]!=="") {
+        const value=Number(cells[2]);
+        if (!Number.isFinite(value)||value<0) throw new Error("Row "+(index+2)+": invalid physical stock count.");
+        entry.counted_stock=value;
+      }
+      if (cells[3]!=="") {
+        if (!["yes","no","true","false","1","0"].includes(cells[3].toLowerCase())) {
+          throw new Error("Row "+(index+2)+": activate must be yes, no, or blank.");
+        }
+        entry.activate=["yes","true","1"].includes(cells[3].toLowerCase());
+      }
+      if (Object.keys(entry).length===1) throw new Error("Row "+(index+2)+": enter a price, stock count or activation status.");
+      return entry;
+    });
+  }
+
+  area.addEventListener("input",()=>{
+    previewedRows=null;
+    previewedText=null;
+    applyButton.disabled=true;
+    feedback.textContent="CSV changed. Preview again before applying.";
+  });
+  modal.querySelector("#grocery-stocktake-close")?.addEventListener("click",closeModal);
+  previewButton.addEventListener("click",async ()=>{
+    if (busy) return;
+    let entries;
+    try {entries=parseRows(area.value);}catch(e){toast(e.message,"error");return;}
+    busy=true;previewButton.disabled=true;applyButton.disabled=true;
+    feedback.textContent="Checking products, prices and physical counts…";
+    try {
+      const {data,error}=await supabase.rpc("storepos_grocery_stocktake",{
+        p_shop_id:state.shop.id,p_rows:entries,p_apply:false
+      });
+      if(error)throw error;
+      previewedRows=entries;
+      previewedText=area.value;
+      const changed=Number(data.changed||0),stockUpdates=Number(data.stock_adjustments||0);
+      feedback.innerHTML=
+        '<strong>Preview passed:</strong> '+number(data.submitted)+' matched products; '+number(changed)+' updates; '+
+        number(stockUpdates)+' actual stock adjustments; '+number(data.newly_activated||0)+' activations.'+
+        '<div class="table-wrap" style="max-height:240px;overflow:auto;margin-top:12px"><table class="retail-table"><thead><tr>'+
+        '<th>Product</th><th>Price before / after</th><th>Stock before / after</th><th>Active</th></tr></thead><tbody>'+
+        (data.rows||[]).map(row=>'<tr><td>'+esc(row.name)+'</td><td>'+
+          money(row.old_price)+' / '+money(row.new_price)+'</td><td>'+
+          number(row.old_stock)+' / '+number(row.new_stock)+'</td><td>'+
+          (row.now_active?'Yes':'No')+'</td></tr>').join('')+'</tbody></table></div>';
+      applyButton.disabled=!changed;
+    }catch(e){
+      previewedRows=null;previewedText=null;
+      feedback.textContent="Preview failed. No changes were applied.";
+      toast(friendlyError(e),"error");
+    }finally{busy=false;previewButton.disabled=false;}
+  });
+  applyButton.addEventListener("click",async ()=>{
+    if(busy||!previewedRows||previewedText!==area.value)return;
+    busy=true;applyButton.disabled=true;previewButton.disabled=true;
+    feedback.textContent="Applying the reviewed price and stock changes…";
+    try {
+      const {data,error}=await supabase.rpc("storepos_grocery_stocktake",{
+        p_shop_id:state.shop.id,p_rows:previewedRows,p_apply:true
+      });
+      if(error)throw error;
+      closeModal();
+      toast(number(data.changed||0)+" products updated with inventory audit records.","success");
+      await pageInventory(root);
+    }catch(e){
+      feedback.textContent="Update failed. Correct the CSV and preview again.";
+      previewedRows=null;previewedText=null;
+      toast(friendlyError(e),"error");
+    }finally{busy=false;previewButton.disabled=false;}
+  });
 }
 
 function openProductModal(root, product, categories) {

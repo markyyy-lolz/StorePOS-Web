@@ -1637,7 +1637,7 @@ async function pageInventory(root) {
     ${head(
       "Inventory",
       "Products, pricing, stock levels and retail availability",
-      canManage ? '<div class="actions"><button id="inventory-bulk-stocktake" class="btn btn-secondary">Bulk Price &amp; Stock</button><button id="add-product" class="btn btn-primary">+ Add product</button></div>' : ""
+      canManage ? '<div class="actions"><button id="inventory-stocktake-download" class="btn btn-secondary">Download Stocktake CSV</button><button id="inventory-bulk-stocktake" class="btn btn-secondary">Bulk Price &amp; Stock</button><button id="add-product" class="btn btn-primary">+ Add product</button></div>' : ""
     )}
     <section class="metrics retail-metrics compact">
       <article class="metric retail-metric"><div class="metric-icon green">▦</div><div><div class="metric-label">Active products</div><div class="metric-value">${number(activeCount)}</div><div class="metric-sub">Available catalog items</div></div></article>
@@ -1726,6 +1726,7 @@ async function pageInventory(root) {
   root.querySelector("#inventory-status-filter")?.addEventListener("change",resetAndLoad);
   prevButton.addEventListener("click",()=>{if(!loading&&currentPage>0)fetchPage(currentPage-1);});
   nextButton.addEventListener("click",()=>{if(!loading&&(currentPage+1)*PAGE_SIZE<matchingTotal)fetchPage(currentPage+1);});
+  root.querySelector("#inventory-stocktake-download")?.addEventListener("click",event=>downloadGroceryStocktakeCsv(event.currentTarget));
   root.querySelector("#inventory-bulk-stocktake")?.addEventListener("click",()=>openGroceryStocktakeModal(root));
   root.querySelector("#add-product")?.addEventListener("click",()=>openProductModal(root,null,categories));
   productTable.addEventListener("click",async event=>{
@@ -1752,6 +1753,50 @@ async function pageInventory(root) {
 }
 
 
+
+async function downloadGroceryStocktakeCsv(button) {
+  if (!["owner","admin","manager","inventory"].includes(state.membership?.role)) {
+    return toast("Inventory management permission required.", "error");
+  }
+  if(button.disabled)return;
+  const shopId=state.shop.id;
+  button.disabled=true;
+  const oldLabel=button.textContent;
+  try {
+    const perPage=100;
+    const fetchChunk=async page=>{
+      const {data,error}=await supabase.rpc("storepos_inventory_page",{
+        p_shop_id:shopId,p_search:"",p_category_id:null,p_status:"",
+        p_offset:page*perPage,p_limit:perPage
+      });
+      if(error)throw error;
+      if(!data||!Array.isArray(data.rows))throw new Error("Incomplete inventory export response.");
+      return data;
+    };
+    const first=await fetchChunk(0);
+    const count=Number(first.total||0);
+    if(!count)throw new Error("No products in this shop.");
+    const totalPages=Math.ceil(count/perPage);
+    const pages=[first.rows];
+    for(let page=1;page<totalPages;page+=6){
+      const indexes=Array.from({length:Math.min(6,totalPages-page)},(_,j)=>page+j);
+      const chunks=await Promise.all(indexes.map(fetchChunk));
+      pages.push(...chunks.map(x=>x.rows));
+      button.textContent="Exporting "+Math.min(count,(page+indexes.length)*perPage)+"/"+count;
+    }
+    const all=pages.flat();
+    if(all.length!==count)throw new Error("Product export incomplete; try again.");
+    // Blank editable cells prevent accidental use of placeholder stock and old
+    // third-party reference prices in the actual store stocktake.
+    const csv=["code,product_name,selling_price,counted_stock,activate"]
+      .concat(all.map(p=>[csvCell(p.barcode||p.sku),csvCell(String(p.name||"").replace(/[\r\n]/g," ")), "","",""].join(",")))
+      .join("\r\n");
+    downloadTextFile("StorePOS-Physical-Stocktake-"+new Date().toISOString().slice(0,10)+".csv",csv,"text/csv;charset=utf-8");
+    toast("Stocktake sheet downloaded: "+count+" products. Fill actual prices and physically counted stock before importing.","success");
+  }catch(error){toast(friendlyError(error),"error");}
+  finally{button.disabled=false;button.textContent=oldLabel;}
+}
+
 function openGroceryStocktakeModal(root) {
   if (!["owner","admin","manager","inventory"].includes(state.membership?.role)) {
     return toast("Inventory management permission required.", "error");
@@ -1759,7 +1804,7 @@ function openGroceryStocktakeModal(root) {
   showModal([
     '<h2>Bulk Price &amp; Physical Stocktake</h2>',
     '<p>Update up to 200 <strong>existing</strong> products at once. Use barcode or SKU; do not create duplicate products. Paste actual Sherine selling prices and shelf counts, not other-store references or estimated inventory.</p>',
-    '<div class="help">CSV header: <code>code,selling_price,counted_stock,activate</code>. Leave a field blank to keep its current value. For activation use <code>yes</code> or <code>no</code>. Barcode codes beginning with 0 must stay as text.</div>',
+    '<div class="help">Recommended CSV: <code>code,product_name,selling_price,counted_stock,activate</code> (the product name is informational only). Compact CSV without product_name is also supported. Leave fields blank to keep current values. For activation enter yes/no. Preserve leading zeroes in barcode columns as text.</div>',
     '<div class="field"><label>Price and stock CSV</label><textarea class="input" id="grocery-stocktake-csv" rows="12" spellcheck="false" placeholder="code,selling_price,counted_stock,activate&#10;4800000000000,45.50,12,yes">code,selling_price,counted_stock,activate</textarea></div>',
     '<div id="grocery-stocktake-feedback" class="help" aria-live="polite">Review each product before applying. No changes are made in Preview.</div>',
     '<div class="modal-actions">',
@@ -1778,31 +1823,48 @@ function openGroceryStocktakeModal(root) {
   function parseRows(raw) {
     const lines=String(raw).split(/\r?\n/).filter(x=>x.trim());
     if (lines.length<2 || lines.length>201) throw new Error("Enter a CSV header and 1–200 product rows.");
-    const header=lines[0].split(",").map(x=>x.trim().toLowerCase());
-    if (header.join(",")!=="code,selling_price,counted_stock,activate") {
-      throw new Error("Use the exact CSV header: code,selling_price,counted_stock,activate.");
-    }
+    const parseLine=line=>{
+      const cells=[];
+      let value="",quoted=false;
+      for(let i=0;i<line.length;i++){
+        const char=line[i];
+        if(char==='"'){
+          if(quoted&&line[i+1]==='"'){value+='"';i++;}
+          else quoted=!quoted;
+        }else if(char===','&&!quoted){cells.push(value.trim());value="";}
+        else value+=char;
+      }
+      if(quoted)throw new Error("Unclosed CSV quotes.");
+      cells.push(value.trim());
+      return cells;
+    };
+    const header=parseLine(lines[0]).map(x=>x.toLowerCase());
+    const compact=header.join(",")==="code,selling_price,counted_stock,activate";
+    const withName=header.join(",")==="code,product_name,selling_price,counted_stock,activate";
+    if(!compact&&!withName)
+      throw new Error("Use the CSV template: code,product_name,selling_price,counted_stock,activate (or omit product_name).");
+    const offset=withName?1:0;
     return lines.slice(1).map((line,index)=>{
-      const cells=line.split(",").map(x=>x.trim());
-      if (cells.length!==4 || !cells[0]) throw new Error("Row "+(index+2)+": enter a SKU/barcode and exactly four CSV columns.");
+      const cells=parseLine(line);
+      if(cells.length!==4+offset||!cells[0])throw new Error("Row "+(index+2)+": invalid CSV columns or missing barcode/SKU.");
       const entry={code:cells[0]};
-      if (cells[1]!=="") {
-        const value=Number(cells[1]);
-        if (!Number.isFinite(value)||value<0) throw new Error("Row "+(index+2)+": invalid selling price.");
+      if(cells[1+offset]!==""){
+        const value=Number(cells[1+offset]);
+        if(!Number.isFinite(value)||value<0)throw new Error("Row "+(index+2)+": invalid selling price.");
         entry.selling_price=value;
       }
-      if (cells[2]!=="") {
-        const value=Number(cells[2]);
-        if (!Number.isFinite(value)||value<0) throw new Error("Row "+(index+2)+": invalid physical stock count.");
+      if(cells[2+offset]!==""){
+        const value=Number(cells[2+offset]);
+        if(!Number.isFinite(value)||value<0)throw new Error("Row "+(index+2)+": invalid physical stock count.");
         entry.counted_stock=value;
       }
-      if (cells[3]!=="") {
-        if (!["yes","no","true","false","1","0"].includes(cells[3].toLowerCase())) {
+      if(cells[3+offset]!==""){
+        const flag=cells[3+offset].toLowerCase();
+        if(!["yes","no","true","false","1","0"].includes(flag))
           throw new Error("Row "+(index+2)+": activate must be yes, no, or blank.");
-        }
-        entry.activate=["yes","true","1"].includes(cells[3].toLowerCase());
+        entry.activate=["yes","true","1"].includes(flag);
       }
-      if (Object.keys(entry).length===1) throw new Error("Row "+(index+2)+": enter a price, stock count or activation status.");
+      if(Object.keys(entry).length===1)throw new Error("Row "+(index+2)+": enter a price, stock count or activation status.");
       return entry;
     });
   }
